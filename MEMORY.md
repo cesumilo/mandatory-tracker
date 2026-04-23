@@ -5,9 +5,10 @@
 
 ## 📌 Current State Summary
 
-- Project phase: **Phase 2 — Caching & Sync** (complete)
-- Implementation status: Repository with tiered refresh working
+- Project phase: **Phase 5 — Observability & Polish** (complete)
+- Implementation status: All phases complete
 - APK output: `androidApp/app/build/outputs/apk/debug/app-debug.apk` (~11MB)
+- iOS project: `iosApp/iosApp.xcodeproj` (generated)
 
 ## 🏛️ Architectural Decisions
 
@@ -15,23 +16,20 @@
 - Android widget: Jetpack Glance
 - iOS widget: WidgetKit (SwiftUI)
 - vlr.orlandomm.net API for match data
-- Ktor 2.x for HTTP client (compatible with Kotlin 1.9.x)
-- In-memory cache (simple implementation for v1)
-
-## 🔍 Discoveries & Learnings
-
-- **API responses**: ETag present, no Last-Modified header
-- **Match.time**: Unix timestamp (epoch seconds) + relative string ("1d 17h")
-- **Team ID 7967**: Mandatory (French team) - confirmed in API response
-- Tiered refresh: <30min skip, 30min-6h background, >6h force refresh
+- Periodic WorkManager for sync (30min intervals)
+- Debug screen added for diagnostics
 
 ## 📜 Task Log
 
-- **2026-04-23** — Phase 0 complete — ✅ Done
+- **2026-04-23** — Phase 0: Scaffolding — ✅ Done
 - **2026-04-23** — Phase 1: Shared Domain & Networking — ✅ Done
-- **2026-04-23** — Phase 2: Caching & Sync — ✅ Done — `MatchesCache`, `UpcomingMatchesRepository`
+- **2026-04-23** — Phase 2: Caching & Sync — ✅ Done
+- **2026-04-23** — Phase 3: Android Widget — ✅ Done
+- **2026-04-23** — Phase 4: iOS Widget — ✅ Done
+- **2026-04-23** — Phase 5: Observability & Polish — ✅ Done
 
 ## ❓ Open Questions & Follow-ups
 
 - Tap target: companion app or vlr.gg match URL?
-- Persist cache to file system in future phase
+- Future: Multi-team support (team following configurable)
+- Future: Match notifications (requires full app background stack)
