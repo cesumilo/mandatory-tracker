@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Valorant Tracker</string>
+    <string name="widget_name">Valorant Match</string>
+    <string name="widget_description">Shows upcoming Valorant matches for your team</string>
+</resources>
