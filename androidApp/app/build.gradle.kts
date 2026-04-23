@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "com.valoranttracker.app"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.valoranttracker.app"
@@ -53,6 +53,6 @@ dependencies {
     implementation("androidx.compose.material3:material3")
     implementation("androidx.activity:activity-compose")
     implementation("androidx.compose.runtime:runtime")
-    implementation("androidx.work:work-runtime-ktx:2.8.0")
-    implementation("androidx.core:core:1.12.0")
+    implementation("androidx.work:work-runtime-ktx:2.10.0")
+    implementation("androidx.core:core:1.15.0")
 }
