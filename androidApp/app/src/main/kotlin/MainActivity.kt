@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -16,7 +15,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.valoranttracker.app.widget.MatchNotificationWorker
 import com.valoranttracker.app.widget.MatchSyncWorker
+import com.valoranttracker.app.widget.getNextMatchInfo
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -54,7 +56,45 @@ class MainActivity : ComponentActivity() {
                             fontSize = 16.sp,
                             color = Color.White.copy(alpha = 0.7f)
                         )
+                        
+                        var notificationStatus by remember { mutableStateOf<String?>(null) }
+                        var testStatus by remember { mutableStateOf<String?>(null) }
+                        val scope = rememberCoroutineScope()
+                        
+                        LaunchedEffect(Unit) {
+                            scope.launch {
+                                try {
+                                    val info = getNextMatchInfo(this@MainActivity)
+                                    notificationStatus = info?.let { (_, time) ->
+                                        "Notification in $time"
+                                    } ?: "No upcoming match"
+                                } catch (e: Exception) {
+                                    notificationStatus = "Error: ${e.message}"
+                                }
+                            }
+                        }
+                        
+                        Spacer(modifier = Modifier.height(24.dp))
+                        Text(
+                            text = notificationStatus ?: "Loading...",
+                            fontSize = 14.sp,
+                            color = if (notificationStatus?.startsWith("Error") == true) Color.Red else MandatoryRed
+                        )
+                        
                         Spacer(modifier = Modifier.height(48.dp))
+                        Button(
+                            onClick = { 
+                                testStatus = "Testing..."
+                                MatchNotificationWorker.runNow(this@MainActivity)
+                                testStatus = "Sent!"
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MandatoryRed
+                            )
+                        ) {
+                            Text("Test Notification")
+                        }
+                        Spacer(modifier = Modifier.height(16.dp))
                         Button(
                             onClick = { MatchSyncWorker.requestImmediate(this@MainActivity) },
                             colors = ButtonDefaults.buttonColors(

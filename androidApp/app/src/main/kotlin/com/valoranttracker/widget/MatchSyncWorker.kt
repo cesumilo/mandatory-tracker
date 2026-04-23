@@ -2,9 +2,12 @@ package com.valoranttracker.app.widget
 
 import android.content.Context
 import androidx.work.*
+import com.valoranttracker.app.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.Serializable
 import java.util.concurrent.TimeUnit
 
 class MatchSyncWorker(
@@ -106,28 +109,28 @@ class MatchSyncWorker(
     }
 }
 
-@kotlinx.serialization.Serializable
-private data class ApiResponse(
+@Serializable
+data class ApiResponse(
     val status: String = "",
     val size: Int = 0,
     val data: List<MatchData> = emptyList()
 )
 
-@kotlinx.serialization.Serializable
-private data class MatchData(
+@Serializable
+data class MatchData(
     val id: String = "",
     val teams: List<TeamData> = emptyList(),
     val status: String = "",
     val event: String = "",
     val tournament: String = "",
     val img: String? = null,
-    @kotlinx.serialization.SerialName("in")
+    @SerialName("in")
     val timeUntil: String = "",
     val timestamp: Long = 0L
 )
 
-@kotlinx.serialization.Serializable
-private data class TeamData(
+@Serializable
+data class TeamData(
     val id: String? = null,
     val name: String = "",
     val country: String? = null,

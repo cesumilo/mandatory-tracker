@@ -54,4 +54,5 @@ dependencies {
     implementation("androidx.activity:activity-compose")
     implementation("androidx.compose.runtime:runtime")
     implementation("androidx.work:work-runtime-ktx:2.8.0")
+    implementation("androidx.core:core:1.12.0")
 }
