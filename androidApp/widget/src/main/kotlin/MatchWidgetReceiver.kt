@@ -1,4 +1,4 @@
-package com.valoranttracker.app.widget
+package com.valoranttracker.widget
 
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver

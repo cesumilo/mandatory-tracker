@@ -1,0 +1,17 @@
+[toolchain]
+version = "0.47.1"
+
+[main]
+android = true
+androidGradlePlugin = "8.2.2"
+kotlin = "1.9.22"
+
+disabledRules = [
+  "no-wildcard-imports",
+  "import-ordering",
+  "comment-starter",
+  "package-naming"
+]
+
+[format]
+maxLineLength = 120

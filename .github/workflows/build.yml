@@ -1,0 +1,68 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-shared:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Gradle Wrapper
+        uses: gradle/wrapper-action@v3
+
+      - name: Build shared module
+        run: ./gradlew :shared:compileDebugKotlinAndroid --no-daemon
+
+  build-android:
+    runs-on: macos-latest
+    needs: build-shared
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Gradle Wrapper
+        uses: gradle/wrapper-action@v3
+
+      - name: Build Android app
+        run: ./gradlew :androidApp:app:assembleDebug --no-daemon
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: androidApp/app/build/outputs/apk/debug/app-debug.apk
+
+  build-ios:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Xcode
+        run: sudo xcode-select -s /Applications/Xcode_16.2.app
+
+      - name: Generate Xcode project
+        run: cd iosApp && xcodegen generate
+
+      - name: Build iOS
+        run: cd iosApp && xcodebuild -project iosApp.xcodeproj -scheme ValorantTracker -configuration Debug -destination 'platform=iOS Simulator,name=iPhone 16' build
+        env:
+          CI: true

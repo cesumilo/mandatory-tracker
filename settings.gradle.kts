@@ -17,3 +17,4 @@ dependencyResolutionManagement {
 rootProject.name = "mandatory-tracker"
 include(":shared")
 include(":androidApp:app")
+include(":androidApp:widget")
