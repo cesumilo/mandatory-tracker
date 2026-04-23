@@ -1,6 +1,5 @@
 package com.valoranttracker.shared.data.dto
 
-import kotlinx.datetime.Instant
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import com.valoranttracker.shared.domain.model.MatchStatus
@@ -43,11 +42,6 @@ fun MatchDto.toDomain(): com.valoranttracker.shared.domain.model.UpcomingMatch {
         else -> MatchStatus.UNKNOWN
     }
 
-    val domainTimestamp = if (timestamp > 0) timestamp else 0L
-    val domainInstant = if (domainTimestamp > 0) {
-        kotlinx.datetime.Instant.fromEpochSeconds(domainTimestamp)
-    } else null
-
     val team1Dto = teams.getOrNull(0)
     val team2Dto = teams.getOrNull(1)
 
@@ -70,8 +64,8 @@ fun MatchDto.toDomain(): com.valoranttracker.shared.domain.model.UpcomingMatch {
         eventName = event,
         tournament = tournament,
         status = domainStatus,
-        scheduledAt = domainInstant,
-        timestamp = domainTimestamp,
+        scheduledAtEpochSeconds = if (timestamp > 0) timestamp else null,
+        timestamp = timestamp,
         rawTimeLabel = timeLabel,
         matchImageUrl = img,
     )
