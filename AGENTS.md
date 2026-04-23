@@ -112,7 +112,7 @@ When the mode is **ON**, the agent MUST:
 4. **Explain the "why" before the "what".** Before producing scaffolding, briefly explain:
    - Which layer this code belongs to and why.
    - Which DDD concept is being modeled.
-   - What the expected behavior is (per `PRODUCT.md`).
+   - What the expected behavior is.
 
 5. **Guide, never solve.** Your role is to help the user *discover* the solution, not deliver it. Use a graduated hint ladder:
    - **Level 1 — Socratic question**: "What invariant should hold after this method runs?"
@@ -235,13 +235,13 @@ The agent remains responsible for scaffolding, tests, and architectural guidance
 
 ## 🧠 Long-Term Memory Management
 
-The agent maintains a persistent **long-term memory** across sessions via a dedicated file: **`MEMORY.md`**. This file is the agent's journal — a durable record of what has been built, what has been learned, and what decisions were made (and why). It complements `PRODUCT.md` (the *what*) and `PLAN.md` (the *how*), by capturing the **history and discoveries** of the project.
+The agent maintains a persistent **long-term memory** across sessions via a dedicated file: **`MEMORY.md`**. This file is the agent's journal — a durable record of what has been built, what has been learned, and what decisions were made (and why). It complements `PLAN.md` (the *how*), by capturing the **history and discoveries** of the project.
 
 Memory management is **fully autonomous**: the agent reads, updates, reconciles, and archives `MEMORY.md` on its own initiative, without waiting for user prompts or triggers. The sole exception is the **first-run bootstrap**, which requires explicit user approval.
 
 ### 📂 The `MEMORY.md` File
 
-`MEMORY.md` lives at the project root alongside `PRODUCT.md` and `PLAN.md`. It is structured as an append-mostly log with the following sections:
+`MEMORY.md` lives at the project root alongside `PLAN.md`. It is structured as an append-mostly log with the following sections:
 
 ````markdown
 # Project Memory
@@ -275,14 +275,13 @@ The very first time the agent operates in a project, `MEMORY.md` will not exist.
 
 At session start, after attempting to read `MEMORY.md`, if the file is missing:
 
-1. Announce: `"🌱 No MEMORY.md found — bootstrapping long-term memory from PRODUCT.md and PLAN.md."`
+1. Announce: `"🌱 No MEMORY.md found — bootstrapping long-term memory from PLAN.md."`
 2. Do NOT proceed with any task until bootstrap is complete.
 
 #### Step 2: Gather
 
-Read `PRODUCT.md` and `PLAN.md` in full, and extract:
+Read `PLAN.md` in full, and extract:
 
-- **From `PRODUCT.md`**: the project's purpose in 1–2 lines, the core domain concepts (for ubiquitous language grounding), and any already-accepted constraints.
 - **From `PLAN.md`**: the current phase, the next pending task, and any architectural decisions already documented there.
 
 If either file is missing or too sparse to extract meaningful context, the agent MUST stop and ask the user to provide or complete them first — `MEMORY.md` should never be bootstrapped on thin air.
@@ -294,12 +293,11 @@ The agent drafts the initial `MEMORY.md` with the following content:
 ````markdown
 # Project Memory
 
-> Bootstrapped on YYYY-MM-DD from PRODUCT.md and PLAN.md.
+> Bootstrapped on YYYY-MM-DD from PLAN.md.
 > This file is the agent's long-term memory. See AGENTS.md § Long-Term Memory Management.
 
 ## 📌 Current State Summary
 
-[1–2 lines: project purpose, derived from PRODUCT.md]
 [1–2 lines: current phase and next task, derived from PLAN.md]
 [1 line: implementation status — typically "No code written yet." on first run]
 
@@ -315,11 +313,11 @@ _No discoveries recorded yet._
 
 ## 📜 Task Log
 
-- **YYYY-MM-DD** — Bootstrapped MEMORY.md from PRODUCT.md and PLAN.md — ✅ Done — `MEMORY.md`
+- **YYYY-MM-DD** — Bootstrapped MEMORY.md from PLAN.md — ✅ Done — `MEMORY.md`
 
 ## ❓ Open Questions & Follow-ups
 
-[If the agent noticed ambiguities in PRODUCT.md or PLAN.md during gathering,
+[If the agent noticed ambiguities in PLAN.md during gathering,
  list them here as open questions. Otherwise:]
 _No open questions recorded yet._
 ````
@@ -349,7 +347,7 @@ Immediately after writing:
 #### 🛡️ Bootstrap Guardrails
 
 - **Never fabricate history.** The Task Log on bootstrap contains exactly one entry: the bootstrap itself. Do NOT retroactively invent entries for code that already exists in the repo — instead, add an Open Question: `"Pre-existing code found in src/; should we backfill Task Log entries or treat it as the starting baseline?"`.
-- **Never migrate requirements into memory.** Product requirements stay in `PRODUCT.md`. The Current State Summary references them in 1–2 lines; it does not duplicate them.
+- **Never migrate requirements into memory.** The Current State Summary references them in 1–2 lines; it does not duplicate them.
 - **Never bootstrap silently.** The user must see the draft and approve it. This is the one memory operation that always requires explicit user consent, because it establishes the baseline everything else will build on.
 - **If the user declines (`skip`)**, the agent operates in memory-disabled mode for the session: it still follows all other rules (TDD, DDD, chunked writes), but does not attempt to read or write memory until the user re-enables it by asking to bootstrap.
 
@@ -357,7 +355,7 @@ Immediately after writing:
 
 At the start of every session, the agent MUST:
 
-1. Read `PRODUCT.md`, `PLAN.md`, and `MEMORY.md` in that order.
+1. Read `PLAN.md`, and `MEMORY.md` in that order.
 2. Use `MEMORY.md` to reconstruct context: what was done last, what decisions constrain current work, what open questions exist.
 3. Announce a 2–3 line recap of the Current State Summary to the user before proposing any action.
 
