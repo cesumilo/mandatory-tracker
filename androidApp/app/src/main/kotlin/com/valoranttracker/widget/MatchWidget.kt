@@ -59,10 +59,10 @@ class MatchWidget : GlanceAppWidget() {
     }
 }
 
-private val BackgroundColor = ColorProvider(Color(0xFF1A1A2E))
+private val BackgroundColor = ColorProvider(Color(0xFF0D0D0D))
 private val TextColor = ColorProvider(Color(0xFFFFFFFF))
 private val SecondaryTextColor = ColorProvider(Color(0xB3FFFFFF))
-private val AccentColor = ColorProvider(Color(0xFFCE2B2B))
+private val AccentColor = ColorProvider(Color(0xFFFF2C2C))
 
 @Composable
 private fun WidgetContent(
@@ -85,11 +85,11 @@ private fun WidgetContent(
             horizontalAlignment = Alignment.Start
         ) {
             Text(
-                text = "Valorant Match",
+                text = "MANDATORY",
                 style = TextStyle(
                     fontSize = 14.sp,
                     fontWeight = FontWeight.Bold,
-                    color = TextColor
+                    color = AccentColor
                 )
             )
             Spacer(modifier = androidx.glance.GlanceModifier.height(8.dp))
