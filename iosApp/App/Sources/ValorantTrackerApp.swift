@@ -13,6 +13,7 @@ struct ValorantTrackerApp: App {
 
 struct ContentView: View {
     @State private var nextMatchInfo: String = "Loading..."
+    @State private var isRefreshing: Bool = false
     
     private let mandatoryRed = Color(red: 1.0, green: 0.17, blue: 0.17)
     private let darkBackground = Color(red: 0.05, green: 0.05, blue: 0.05)
@@ -28,6 +29,14 @@ struct ContentView: View {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 120, height: 120)
+                    .foregroundColor(mandatoryRed)
+                    .overlay(
+                        Image(systemName: "sportscourt")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 60, height: 60)
+                            .foregroundColor(mandatoryRed)
+                    )
                 
                 Text("MANDATORY")
                     .font(.system(size: 32, weight: .bold))
@@ -37,9 +46,14 @@ struct ContentView: View {
                     .font(.system(size: 16))
                     .foregroundColor(.white.opacity(0.7))
                 
-                Text(nextMatchInfo)
-                    .font(.system(size: 14))
-                    .foregroundColor(mandatoryRed)
+                if isRefreshing {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle(tint: mandatoryRed))
+                } else {
+                    Text(nextMatchInfo)
+                        .font(.system(size: 14))
+                        .foregroundColor(mandatoryRed)
+                }
                 
                 Spacer()
                 
@@ -55,23 +69,36 @@ struct ContentView: View {
                 .padding(.horizontal, 24)
                 
                 Button(action: refreshWidget) {
-                    Text("Refresh Widget")
-                        .font(.system(size: 16, weight: .medium))
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.clear)
-                        .foregroundColor(mandatoryRed)
-                        .overlay(
-                            RoundedRectangle(cornerRadius: 12)
-                                .stroke(mandatoryRed, lineWidth: 2)
-                        )
+                    HStack {
+                        if isRefreshing {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: mandatoryRed))
+                                .scaleEffect(0.8)
+                        }
+                        Text(isRefreshing ? "Refreshing..." : "Refresh Widget")
+                    }
+                    .font(.system(size: 16, weight: .medium))
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.clear)
+                    .foregroundColor(mandatoryRed)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 12)
+                            .stroke(mandatoryRed, lineWidth: 2)
+                    )
                 }
+                .disabled(isRefreshing)
                 .padding(.horizontal, 24)
                 .padding(.bottom, 24)
             }
         }
         .onAppear {
             loadNextMatchInfo()
+        }
+        .onOpenURL { url in
+            if url.scheme == "valoranttracker" {
+                loadNextMatchInfo()
+            }
         }
     }
     
@@ -104,7 +131,7 @@ struct ContentView: View {
                     let timeUntil = match["in"] as? String ?? ""
                     
                     DispatchQueue.main.async {
-                        nextMatchInfo = "Notification in \(timeUntil)"
+                        nextMatchInfo = "vs \(opponentName) - \(event) in \(timeUntil)"
                     }
                     return
                 }
@@ -134,7 +161,12 @@ struct ContentView: View {
     }
     
     private func refreshWidget() {
+        isRefreshing = true
         loadNextMatchInfo()
         WidgetCenter.shared.reloadAllTimelines()
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+            isRefreshing = false
+        }
     }
 }

@@ -89,49 +89,51 @@ struct MatchWidgetEntryView: View {
     private let darkBackground = Color(red: 0.05, green: 0.05, blue: 0.05)
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text("MANDATORY")
-                .font(.caption)
-                .fontWeight(.bold)
-                .foregroundColor(mandatoryRed)
-            
-            Spacer()
-            
-            if entry.isPlaceholder {
-                Text("Loading...")
-                    .font(.caption2)
-                    .foregroundColor(.white.opacity(0.7))
-            } else {
-                Text("vs \(entry.opponentName)")
-                    .font(.headline)
+        Link(destination: URL(string: "valoranttracker://match/\(entry.opponentName)")!) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("MANDATORY")
+                    .font(.caption)
                     .fontWeight(.bold)
-                    .foregroundColor(.white)
-                    .lineLimit(1)
-                
-                if !entry.eventName.isEmpty {
-                    Text(entry.eventName)
-                        .font(.caption2)
-                        .foregroundColor(.white.opacity(0.7))
-                        .lineLimit(1)
-                }
-                
-                if !entry.tournament.isEmpty {
-                    Text(entry.tournament)
-                        .font(.caption2)
-                        .foregroundColor(.white.opacity(0.5))
-                        .lineLimit(1)
-                }
+                    .foregroundColor(mandatoryRed)
                 
                 Spacer()
                 
-                Text("in \(entry.timeUntil)")
-                    .font(.caption)
-                    .fontWeight(.medium)
-                    .foregroundColor(mandatoryRed)
+                if entry.isPlaceholder {
+                    Text("Loading...")
+                        .font(.caption2)
+                        .foregroundColor(.white.opacity(0.7))
+                } else {
+                    Text("vs \(entry.opponentName)")
+                        .font(.headline)
+                        .fontWeight(.bold)
+                        .foregroundColor(.white)
+                        .lineLimit(1)
+                    
+                    if !entry.eventName.isEmpty {
+                        Text(entry.eventName)
+                            .font(.caption2)
+                            .foregroundColor(.white.opacity(0.7))
+                            .lineLimit(1)
+                    }
+                    
+                    if !entry.tournament.isEmpty {
+                        Text(entry.tournament)
+                            .font(.caption2)
+                            .foregroundColor(.white.opacity(0.5))
+                            .lineLimit(1)
+                    }
+                    
+                    Spacer()
+                    
+                    Text("in \(entry.timeUntil)")
+                        .font(.caption)
+                        .fontWeight(.medium)
+                        .foregroundColor(mandatoryRed)
+                }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .padding()
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-        .padding()
         .containerBackground(for: .widget) {
             darkBackground
         }
@@ -156,16 +158,4 @@ struct MatchWidget: Widget {
         .description("Shows upcoming Valorant matches for Mandatory")
         .supportedFamilies([.systemSmall, .systemMedium])
     }
-}
-
-#Preview(as: .systemSmall) {
-    MatchWidget()
-} timeline: {
-    MatchEntry(date: Date(), opponentName: "Caldya Esport", eventName: "Group Stage–Week 4", tournament: "Challengers 2026: France", timeUntil: "1d 16h", isPlaceholder: false)
-}
-
-#Preview(as: .systemMedium) {
-    MatchWidget()
-} timeline: {
-    MatchEntry(date: Date(), opponentName: "Caldya Esport", eventName: "Group Stage–Week 4", tournament: "Challengers 2026: France", timeUntil: "1d 16h", isPlaceholder: false)
 }

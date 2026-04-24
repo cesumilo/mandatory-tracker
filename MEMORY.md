@@ -18,6 +18,7 @@
 - vlr.orlandomm.net API for match data
 - Periodic WorkManager for sync (30min intervals)
 - AlarmManager + BroadcastReceiver for exact notification timing (1h before match)
+- iOS deployment target: 17.0 (for containerBackground)
 
 ## 📜 Task Log
 
@@ -34,6 +35,9 @@
   - Added test notification button (shows immediate toast)
   - Widget now clickable (opens app)
   - Removed unused widget picker button
+  - iOS: Added visual feedback on refresh button
+  - iOS: Added widget tap handler (opens app via deep link)
+  - iOS: Added URL scheme "valoranttracker://"
 
 ## 🔍 Discoveries & Learnings
 
