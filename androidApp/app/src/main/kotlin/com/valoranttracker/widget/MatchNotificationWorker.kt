@@ -175,11 +175,47 @@ class MatchNotificationWorker(
     companion object {
         const val CHANNEL_ID = "match_notifications"
         const val WORK_NAME = "match_notification_worker"
+        private const val TEST_NOTIFICATION_ID = 999999
 
         fun runNow(context: Context) {
             WorkManager.getInstance(context).enqueue(
                 OneTimeWorkRequestBuilder<MatchNotificationWorker>().build()
             )
+        }
+        
+        fun showTestNotification(context: Context) {
+            createNotificationChannel(context)
+            
+            val activityIntent = Intent(context, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            }
+            val pendingIntent = PendingIntent.getActivity(
+                context, 0, activityIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            
+            val notification = ANotification.Builder(context, CHANNEL_ID)
+                .setSmallIcon(R.drawable.mandatory_logo)
+                .setContentTitle("Test Notification")
+                .setContentText("Notifications are working!")
+                .setPriority(ANotification.PRIORITY_HIGH)
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(true)
+                .build()
+            
+            val notifManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notifManager.notify(TEST_NOTIFICATION_ID, notification)
+        }
+        
+        private fun createNotificationChannel(context: Context) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                val notifManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                notifManager.createNotificationChannel(
+                    NotificationChannel(CHANNEL_ID, "Match Notifications", NotificationManager.IMPORTANCE_HIGH).apply {
+                        description = "Notifications for Mandatory matches"
+                    }
+                )
+            }
         }
 
         fun schedule(context: Context) {

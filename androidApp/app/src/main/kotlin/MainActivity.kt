@@ -1,7 +1,5 @@
 package com.valoranttracker.app
 
-import android.appwidget.AppWidgetManager
-import android.content.ComponentName
 import android.content.Intent
 import android.Manifest
 import android.content.pm.PackageManager
@@ -110,12 +108,12 @@ class MainActivity : ComponentActivity() {
                                     ) == PackageManager.PERMISSION_GRANTED
                                     
                                     if (hasPermission) {
-                                        MatchNotificationWorker.runNow(context)
+                                        MatchNotificationWorker.showTestNotification(context)
                                     } else {
                                         notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                                     }
                                 } else {
-                                    MatchNotificationWorker.runNow(context)
+                                    MatchNotificationWorker.showTestNotification(context)
                                 }
                             },
                             colors = ButtonDefaults.buttonColors(
@@ -144,34 +142,6 @@ class MainActivity : ComponentActivity() {
                             )
                         ) {
                             Text(if (widgetRefreshStatus?.startsWith("Refreshing") == true) "Refreshing..." else "Refresh Widget")
-                        }
-                        widgetRefreshStatus?.let { status ->
-                            Spacer(modifier = Modifier.height(8.dp))
-                            Text(
-                                text = status,
-                                fontSize = 12.sp,
-                                color = if (status.startsWith("Error")) Color.Red else Color.White.copy(alpha = 0.7f)
-                            )
-                        }
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Button(
-                            onClick = {
-                                try {
-                                    val intent = Intent("android.appwidget.action.APPWIDGET_PICK")
-                                    intent.putExtra("appWidgetId", 0)
-                                    context.startActivity(intent)
-                                } catch (e: Exception) {
-                                    val intent = Intent(Intent.ACTION_MAIN).apply {
-                                        addCategory(Intent.CATEGORY_HOME)
-                                    }
-                                    context.startActivity(intent)
-                                }
-                            },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MandatoryRed
-                            )
-                        ) {
-                            Text("Add Widget to Home Screen")
                         }
                     }
                 }

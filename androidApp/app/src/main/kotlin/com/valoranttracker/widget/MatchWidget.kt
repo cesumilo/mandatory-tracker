@@ -1,9 +1,14 @@
 package com.valoranttracker.app.widget
 
 import android.content.Context
+import android.content.Intent
 import android.content.SharedPreferences
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
+import androidx.glance.action.ActionParameters
+import androidx.glance.action.actionParametersOf
+import androidx.glance.action.actionStartActivity
+import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.provideContent
@@ -25,6 +30,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.valoranttracker.app.MainActivity
 
 class MatchWidget : GlanceAppWidget() {
 
@@ -76,7 +82,8 @@ private fun WidgetContent(
             .fillMaxSize()
             .background(BackgroundColor)
             .cornerRadius(16.dp)
-            .padding(16.dp),
+            .padding(16.dp)
+            .clickable(actionStartActivity<MainActivity>()),
         contentAlignment = Alignment.TopStart
     ) {
         Column(
