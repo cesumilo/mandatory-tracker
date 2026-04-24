@@ -5,10 +5,10 @@
 
 ## 📌 Current State Summary
 
-- Project phase: **Phase 6 — Polish & UX** (complete)
-- Implementation status: Android app fully functional with widget, notifications, and companion UI
+- Project phase: **Fully functional** - Android and iOS apps working
+- Implementation status: Both Android and iOS apps functional with widgets and notifications
 - APK output: `androidApp/app/build/outputs/apk/debug/app-debug.apk` (~11MB)
-- iOS project: `iosApp/iosApp.xcodeproj` (generated)
+- iOS project: `iosApp/iosApp.xcodeproj`
 
 ## 🏛️ Architectural Decisions
 
@@ -29,6 +29,10 @@
 - **2026-04-23** — Phase 4: iOS Widget — ✅ Done
 - **2026-04-23** — Phase 5: Observability & Polish — ✅ Done
 - **2026-04-24** — Phase 6: Polish & UX — ✅ Done
+  - iOS: Fixed black screen (added launch screen background color)
+  - iOS: Added Xcode scheme files
+  - iOS: Fixed red screen only (added GeometryReader, spacer fixes)
+  - iOS: Fixed notification not showing (added @UIApplicationDelegateAdaptor)
   - Fixed notification scheduling (only 1h before match)
   - Added POST_NOTIFICATIONS permission request
   - Added visual feedback on widget refresh
@@ -41,6 +45,9 @@
 
 ## 🔍 Discoveries & Learnings
 
+- iOS: Must use @UIApplicationDelegateAdaptor for UNUserNotificationCenterDelegate to work
+- iOS: AuthorizationStatus 2 = denied, 1 = authorized, 0 = notDetermined
+- iOS: setDelegate() in init() may be too late - use @UIApplicationDelegateAdaptor
 - Android 13+ requires POST_NOTIFICATIONS runtime permission for notifications
 - SCHEDULE_EXACT_ALARM and USE_EXACT_ALARM permissions needed for precise notification timing on Android 12+
 - AlarmManager.setExactAndAllowWhileIdle for exact alarm scheduling

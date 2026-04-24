@@ -1,15 +1,36 @@
 import SwiftUI
 import WidgetKit
 import UserNotifications
+import UIKit
 
 @main
 struct ValorantTrackerApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    
     var body: some Scene {
         WindowGroup {
             ContentView()
         }
     }
 }
+
+class AppDelegate: NSObject, UIApplicationDelegate {
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]?) -> Bool {
+        UNUserNotificationCenter.current().delegate = self
+        return true
+    }
+}
+
+extension AppDelegate: UNUserNotificationCenterDelegate {
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        completionHandler([.banner, .sound])
+    }
+    
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+        completionHandler()
+    }
+}
+
 
 struct ContentView: View {
     @State private var nextMatchInfo: String = "Loading..."
@@ -19,77 +40,78 @@ struct ContentView: View {
     private let darkBackground = Color(red: 0.05, green: 0.05, blue: 0.05)
     
     var body: some View {
-        ZStack {
-            darkBackground.ignoresSafeArea()
-            
-            VStack(spacing: 16) {
-                Spacer()
+        GeometryReader { geometry in
+            ZStack {
+                darkBackground
+                    .ignoresSafeArea()
                 
-                Image("MandatoryLogo")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 120, height: 120)
-                    .foregroundColor(mandatoryRed)
-                    .overlay(
-                        Image(systemName: "sportscourt")
-                            .resizable()
-                            .scaledToFit()
-                            .frame(width: 60, height: 60)
-                            .foregroundColor(mandatoryRed)
-                    )
-                
-                Text("MANDATORY")
-                    .font(.system(size: 32, weight: .bold))
-                    .foregroundColor(mandatoryRed)
-                
-                Text("Valorant Tracker")
-                    .font(.system(size: 16))
-                    .foregroundColor(.white.opacity(0.7))
-                
-                if isRefreshing {
-                    ProgressView()
-                        .progressViewStyle(CircularProgressViewStyle(tint: mandatoryRed))
-                } else {
-                    Text(nextMatchInfo)
-                        .font(.system(size: 14))
+                VStack(spacing: 16) {
+                    Spacer()
+                        .frame(height: geometry.size.height * 0.15)
+                    
+                    Image("MandatoryLogo")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 80, height: 80)
                         .foregroundColor(mandatoryRed)
-                }
-                
-                Spacer()
-                
-                Button(action: testNotification) {
-                    Text("Test Notification")
-                        .font(.system(size: 16, weight: .medium))
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(mandatoryRed)
-                        .foregroundColor(.white)
-                        .cornerRadius(12)
-                }
-                .padding(.horizontal, 24)
-                
-                Button(action: refreshWidget) {
-                    HStack {
-                        if isRefreshing {
-                            ProgressView()
-                                .progressViewStyle(CircularProgressViewStyle(tint: mandatoryRed))
-                                .scaleEffect(0.8)
-                        }
-                        Text(isRefreshing ? "Refreshing..." : "Refresh Widget")
+                    
+                    Text("MANDATORY")
+                        .font(.system(size: 32, weight: .bold))
+                        .foregroundColor(mandatoryRed)
+                    
+                    Text("Valorant Tracker")
+                        .font(.system(size: 16))
+                        .foregroundColor(.white.opacity(0.7))
+                    
+                    Spacer()
+                        .frame(height: 24)
+                    
+                    if isRefreshing {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: mandatoryRed))
+                    } else {
+                        Text(nextMatchInfo)
+                            .font(.system(size: 14))
+                            .foregroundColor(mandatoryRed)
                     }
-                    .font(.system(size: 16, weight: .medium))
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.clear)
-                    .foregroundColor(mandatoryRed)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 12)
-                            .stroke(mandatoryRed, lineWidth: 2)
-                    )
+                    
+                    Spacer()
+                    
+                    VStack(spacing: 16) {
+                        Button(action: testNotification) {
+                            Text("Test Notification")
+                                .font(.system(size: 16, weight: .medium))
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(mandatoryRed)
+                                .foregroundColor(.white)
+                                .cornerRadius(12)
+                        }
+                        .padding(.horizontal, 24)
+                        
+                        Button(action: refreshWidget) {
+                            HStack {
+                                if isRefreshing {
+                                    ProgressView()
+                                        .progressViewStyle(CircularProgressViewStyle(tint: mandatoryRed))
+                                        .scaleEffect(0.8)
+                                }
+                                Text(isRefreshing ? "Refreshing..." : "Refresh Widget")
+                            }
+                            .font(.system(size: 16, weight: .medium))
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .foregroundColor(mandatoryRed)
+                            .overlay(
+                                RoundedRectangle(cornerRadius: 12)
+                                    .stroke(mandatoryRed, lineWidth: 2)
+                            )
+                        }
+                        .disabled(isRefreshing)
+                        .padding(.horizontal, 24)
+                    }
+                    .padding(.bottom, 32)
                 }
-                .disabled(isRefreshing)
-                .padding(.horizontal, 24)
-                .padding(.bottom, 24)
             }
         }
         .onAppear {
@@ -145,17 +167,48 @@ struct ContentView: View {
     
     private func testNotification() {
         let center = UNUserNotificationCenter.current()
-        center.requestAuthorization(options: [.alert, .badge, .sound]) { granted, _ in
-            if granted {
-                let content = UNMutableNotificationContent()
-                content.title = "Next Match"
-                content.body = "Mandatory vs Caldya Esport - Group Stage"
-                content.sound = .default
-                
-                let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 1, repeats: false)
-                let request = UNNotificationRequest(identifier: UUID().uuidString, content: content, trigger: trigger)
-                
-                center.add(request)
+        
+        // First check current authorization status
+        center.getNotificationSettings { settings in
+            print("Current notification settings: \(settings.authorizationStatus.rawValue)")
+            
+            // AuthorizationStatus: 0=notDetermined, 1=authorized, 2=denied
+            if settings.authorizationStatus == .authorized || settings.authorizationStatus == .provisional {
+                DispatchQueue.main.async {
+                    self.scheduleNotification(center: center)
+                }
+            } else if settings.authorizationStatus == .notDetermined {
+                // Request permission
+                center.requestAuthorization(options: [.alert, .badge, .sound, .criticalAlert]) { granted, error in
+                    print("Permission granted: \(granted), error: \(error?.localizedDescription ?? "none")")
+                    
+                    if granted {
+                        DispatchQueue.main.async {
+                            self.scheduleNotification(center: center)
+                        }
+                    }
+                }
+            } else {
+                print("Notification permission DENIED - go to Settings to enable")
+            }
+        }
+    }
+    
+    private func scheduleNotification(center: UNUserNotificationCenter) {
+        let content = UNMutableNotificationContent()
+        content.title = "Next Match"
+        content.body = "Mandatory vs Caldya Esport - Group Stage"
+        content.sound = UNNotificationSound.default
+        
+        // Fire after 3 seconds so user has time to see it
+        let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 3, repeats: false)
+        let request = UNNotificationRequest(identifier: "test-notification", content: content, trigger: trigger)
+        
+        center.add(request) { error in
+            if let error = error {
+                print("Failed to schedule: \(error.localizedDescription)")
+            } else {
+                print("Notification scheduled - will appear in 3 seconds")
             }
         }
     }
