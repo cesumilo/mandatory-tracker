@@ -42,6 +42,7 @@
   - iOS: Added visual feedback on refresh button
   - iOS: Added widget tap handler (opens app via deep link)
   - iOS: Added URL scheme "valoranttracker://"
+  - iOS: Now using MandatoryLogo from assets (cleaner implementation)
 
 ## 🔍 Discoveries & Learnings
 
