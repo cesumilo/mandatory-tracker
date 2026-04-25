@@ -1,12 +1,12 @@
 package com.valoranttracker.app.widget
 
 import android.content.Context
-import android.content.Intent
-import android.content.SharedPreferences
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
-import androidx.glance.action.ActionParameters
-import androidx.glance.action.actionParametersOf
 import androidx.glance.action.actionStartActivity
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
@@ -26,33 +26,37 @@ import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.valoranttracker.app.MainActivity
 
 class MatchWidget : GlanceAppWidget() {
-
-    override suspend fun provideGlance(context: Context, id: GlanceId) {
+    override suspend fun provideGlance(
+        context: Context,
+        id: GlanceId,
+    ) {
         val prefs = context.getSharedPreferences("widget_prefs", Context.MODE_PRIVATE)
         val opponent = prefs.getString("opponent", null)
         val event = prefs.getString("event", null)
         val timeUntil = prefs.getString("timeUntil", null)
         val tournament = prefs.getString("tournament", null)
-        
+
         provideContent {
             WidgetContent(
                 opponent = opponent,
                 event = event,
                 timeUntil = timeUntil,
-                tournament = tournament
+                tournament = tournament,
             )
         }
     }
-    
+
     companion object {
-        suspend fun updateWidget(context: Context, opponent: String?, event: String?, timeUntil: String?, tournament: String?) {
+        suspend fun updateWidget(
+            context: Context,
+            opponent: String?,
+            event: String?,
+            timeUntil: String?,
+            tournament: String?,
+        ) {
             context.getSharedPreferences("widget_prefs", Context.MODE_PRIVATE)
                 .edit()
                 .putString("opponent", opponent)
@@ -75,83 +79,90 @@ private fun WidgetContent(
     opponent: String?,
     event: String?,
     timeUntil: String?,
-    tournament: String?
+    tournament: String?,
 ) {
     Box(
-        modifier = androidx.glance.GlanceModifier
-            .fillMaxSize()
-            .background(BackgroundColor)
-            .cornerRadius(16.dp)
-            .padding(16.dp)
-            .clickable(actionStartActivity<MainActivity>()),
-        contentAlignment = Alignment.TopStart
+        modifier =
+            androidx.glance.GlanceModifier
+                .fillMaxSize()
+                .background(BackgroundColor)
+                .cornerRadius(16.dp)
+                .padding(16.dp)
+                .clickable(actionStartActivity<MainActivity>()),
+        contentAlignment = Alignment.TopStart,
     ) {
         Column(
             modifier = androidx.glance.GlanceModifier.fillMaxWidth(),
             verticalAlignment = Alignment.Top,
-            horizontalAlignment = Alignment.Start
+            horizontalAlignment = Alignment.Start,
         ) {
             Text(
                 text = "MANDATORY",
-                style = TextStyle(
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = AccentColor
-                )
+                style =
+                    TextStyle(
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = AccentColor,
+                    ),
             )
             Spacer(modifier = androidx.glance.GlanceModifier.height(8.dp))
-            
+
             if (opponent != null) {
                 Text(
                     text = "vs $opponent",
-                    style = TextStyle(
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = TextColor
-                    )
+                    style =
+                        TextStyle(
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = TextColor,
+                        ),
                 )
             } else {
                 Text(
                     text = "No upcoming match",
-                    style = TextStyle(
-                        fontSize = 14.sp,
-                        color = SecondaryTextColor
-                    )
+                    style =
+                        TextStyle(
+                            fontSize = 14.sp,
+                            color = SecondaryTextColor,
+                        ),
                 )
             }
-            
+
             if (event != null) {
                 Spacer(modifier = androidx.glance.GlanceModifier.height(4.dp))
                 Text(
                     text = event,
-                    style = TextStyle(
-                        fontSize = 12.sp,
-                        color = SecondaryTextColor
-                    )
+                    style =
+                        TextStyle(
+                            fontSize = 12.sp,
+                            color = SecondaryTextColor,
+                        ),
                 )
             }
-            
+
             if (tournament != null) {
                 Spacer(modifier = androidx.glance.GlanceModifier.height(2.dp))
                 Text(
                     text = tournament,
-                    style = TextStyle(
-                        fontSize = 10.sp,
-                        color = ColorProvider(Color(0x80FFFFFF))
-                    )
+                    style =
+                        TextStyle(
+                            fontSize = 10.sp,
+                            color = ColorProvider(Color(0x80FFFFFF)),
+                        ),
                 )
             }
-            
+
             Spacer(modifier = androidx.glance.GlanceModifier.height(8.dp))
-            
+
             if (timeUntil != null) {
                 Text(
                     text = "in $timeUntil",
-                    style = TextStyle(
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Medium,
-                        color = AccentColor
-                    )
+                    style =
+                        TextStyle(
+                            fontSize = 14.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = AccentColor,
+                        ),
                 )
             }
         }

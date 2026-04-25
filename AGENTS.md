@@ -120,7 +120,7 @@ When the mode is **ON**, the agent MUST:
    - **Level 3 — Directional hint**: "You'll want to validate *before* constructing, and throw a domain error if invalid."
    - **Level 4 — Narrow the search**: "Look at how `String.prototype.match` returns `null` for no match — that's your signal."
    - **Level 5 — Pseudocode sketch (last resort)**: A language-agnostic outline in plain English or comments, describing *steps* without code.
-   
+
    Escalate **one level at a time**, only when the user is still stuck after trying. Never jump straight to Level 5.
 
 6. **Review, don't rewrite.** When the user shares their implementation:
@@ -502,4 +502,3 @@ suspend fun getUpcomingMatchesForTeam(teamId: String = "7967"): List<UpcomingMat
 - No live score updates (polling too aggressive for widgets).
 - No notifications (this is a widget-only project; notifications would require a full app foreground/background stack).
 - No multi-team following (hardcoded to `7967` initially; may become configurable later — track as an Open Question in `MEMORY.md`).
-

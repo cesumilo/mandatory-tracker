@@ -6,7 +6,7 @@ struct ContentView: View {
     @State private var isRefreshing = false
     @State private var upcomingMatches: [MatchData] = []
     @State private var pastMatches: [MatchData] = []
-    @State private var notificationStatus: String? = nil
+    @State private var notificationStatus: String?
 
     private let mandatoryRed = Color(red: 1.0, green: 0.17, blue: 0.17)
     private let darkBackground = Color(red: 0.05, green: 0.05, blue: 0.05)
@@ -15,7 +15,7 @@ struct ContentView: View {
     private let lossRed = Color(red: 0.9, green: 0.22, blue: 0.21)
 
     var body: some View {
-        GeometryReader { geometry in
+        GeometryReader { _ in
             ZStack {
                 darkBackground
                     .ignoresSafeArea()
@@ -149,7 +149,7 @@ struct ContentView: View {
     private func fetchPastMatches() async {
         var allMatches: [[String: Any]] = []
 
-        for page in 1...5 {
+        for page in 1 ... 5 {
             guard let url = URL(string: "https://vlr.orlandomm.net/api/v1/results?page=\(page)") else { continue }
 
             do {
@@ -212,7 +212,8 @@ struct ContentView: View {
         do {
             let (data, _) = try await URLSession.shared.data(from: url)
             guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-                  let matches = json["data"] as? [[String: Any]] else {
+                  let matches = json["data"] as? [[String: Any]]
+            else {
                 notificationStatus = nil
                 return
             }

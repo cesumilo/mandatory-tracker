@@ -1,7 +1,5 @@
 package com.valoranttracker.shared.domain.model
 
-import kotlinx.datetime.Instant
-import kotlinx.serialization.Contextual
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -57,7 +55,7 @@ enum class MatchStatus {
     LIVE,
     UPCOMING,
     COMPLETED,
-    UNKNOWN
+    UNKNOWN,
 }
 
 fun UpcomingMatch.opponentFor(teamId: String): TeamRef {

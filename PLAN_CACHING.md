@@ -247,4 +247,3 @@ Register a `BGAppRefreshTask` in the main app for background syncs beyond Widget
 - Under normal use, no more than ~50 requests/day/user to the API.
 - No crashes on schema drift — unknown fields are ignored, missing fields fall back gracefully.
 - Network failures degrade quietly: widget shows last good data with a stale indicator.
-

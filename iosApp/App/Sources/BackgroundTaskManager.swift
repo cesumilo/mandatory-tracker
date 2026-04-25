@@ -1,5 +1,5 @@
-import Foundation
 import BackgroundTasks
+import Foundation
 import UIKit
 
 class BackgroundTaskManager {
@@ -12,8 +12,9 @@ class BackgroundTaskManager {
         BGTaskScheduler.shared.register(
             forTaskWithIdentifier: Self.refreshTaskIdentifier,
             using: nil
-        ) { task in
-            self.handleAppRefresh(task: task as! BGAppRefreshTask)
+        ) { [weak self] task in
+            guard let refreshTask = task as? BGAppRefreshTask else { return }
+            self?.handleAppRefresh(task: refreshTask)
         }
     }
 

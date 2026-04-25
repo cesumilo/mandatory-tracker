@@ -197,4 +197,3 @@ Make the system debuggable and shippable.
 - **Caching Strategy** — see dedicated plan document `PLAN_CACHING.md`; Phase 2 tasks mirror it.
 - _(Future)_ Multi-team support
 - _(Future)_ Match notifications (would require full app background stack — out of scope for v1)
-

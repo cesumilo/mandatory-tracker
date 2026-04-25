@@ -44,11 +44,12 @@ class UpcomingMatchesRepository(
 
     suspend fun syncIfNeeded(): List<UpcomingMatch> {
         val now = Clock.System.now()
-        val policy = if (lastRefreshed != null) {
-            calculateRefreshPolicy(lastRefreshed!!, consecutiveFailures, now)
-        } else {
-            RefreshPolicy.SERVE_FORCE_REFRESH
-        }
+        val policy =
+            if (lastRefreshed != null) {
+                calculateRefreshPolicy(lastRefreshed!!, consecutiveFailures, now)
+            } else {
+                RefreshPolicy.SERVE_FORCE_REFRESH
+            }
 
         _refreshState.value = _refreshState.value.copy(policy = policy)
 
@@ -59,7 +60,10 @@ class UpcomingMatchesRepository(
         }
     }
 
-    private suspend fun performSync(policy: RefreshPolicy, now: Instant): List<UpcomingMatch> {
+    private suspend fun performSync(
+        policy: RefreshPolicy,
+        now: Instant,
+    ): List<UpcomingMatch> {
         _refreshState.value = _refreshState.value.copy(isRefreshing = true, lastError = null)
 
         val result = api.getMatches(teamId)
@@ -67,26 +71,28 @@ class UpcomingMatchesRepository(
         return result.fold(
             onSuccess = { fetchedMatches ->
                 consecutiveFailures = 0
-                val cached = CachedMatches(
-                    teamId = teamId,
-                    matches = fetchedMatches,
-                    fetchedAtEpochSeconds = now.epochSeconds,
-                    consecutiveFailures = 0,
-                )
+                val cached =
+                    CachedMatches(
+                        teamId = teamId,
+                        matches = fetchedMatches,
+                        fetchedAtEpochSeconds = now.epochSeconds,
+                        consecutiveFailures = 0,
+                    )
                 cache.save(cached)
                 _matches.value = fetchedMatches
                 lastRefreshed = now
-                _refreshState.value = _refreshState.value.copy(
-                    isRefreshing = false,
-                    lastRefreshedEpoch = now.epochSeconds,
-                )
+                _refreshState.value =
+                    _refreshState.value.copy(
+                        isRefreshing = false,
+                        lastRefreshedEpoch = now.epochSeconds,
+                    )
                 fetchedMatches
             },
             onFailure = { error ->
                 consecutiveFailures++
                 _refreshState.value = _refreshState.value.copy(isRefreshing = false, lastError = error.message)
                 _matches.value
-            }
+            },
         )
     }
 
@@ -94,7 +100,11 @@ class UpcomingMatchesRepository(
 
     suspend fun forceRefresh(): List<UpcomingMatch> = performSync(RefreshPolicy.SERVE_FORCE_REFRESH, Clock.System.now())
 
-    private fun calculateRefreshPolicy(fetchedAt: Instant, failures: Int, now: Instant): RefreshPolicy {
+    private fun calculateRefreshPolicy(
+        fetchedAt: Instant,
+        failures: Int,
+        now: Instant,
+    ): RefreshPolicy {
         val cacheAgeMs = now.toEpochMilliseconds() - fetchedAt.toEpochMilliseconds()
         val cacheAgeMinutes = cacheAgeMs / 60000
 
@@ -111,14 +121,15 @@ class UpcomingMatchesRepository(
 
     fun nextRefreshDelayMinutes(policy: RefreshPolicy): Long {
         val jitter = (-2..2).random()
-        val base = when (policy) {
-            RefreshPolicy.SKIP_FRESH -> 30L
-            RefreshPolicy.SERVE_BACKGROUND -> 60L
-            RefreshPolicy.SERVE_FORCE_REFRESH -> 60L
-            RefreshPolicy.TIGHTEN_15MIN -> 15L
-            RefreshPolicy.LOOSEN_6H -> 360L
-            RefreshPolicy.CIRCUIT_BREAKER_PAUSE -> 60L
-        }
+        val base =
+            when (policy) {
+                RefreshPolicy.SKIP_FRESH -> 30L
+                RefreshPolicy.SERVE_BACKGROUND -> 60L
+                RefreshPolicy.SERVE_FORCE_REFRESH -> 60L
+                RefreshPolicy.TIGHTEN_15MIN -> 15L
+                RefreshPolicy.LOOSEN_6H -> 360L
+                RefreshPolicy.CIRCUIT_BREAKER_PAUSE -> 60L
+            }
         return base + jitter
     }
 }

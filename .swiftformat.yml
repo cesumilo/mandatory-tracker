@@ -1,0 +1,11 @@
+--swiftversion 5.9
+--indent 4
+--indentcase false
+--trimwhitespace always
+--nospaceoperators ..<,!
+--ranges spaced
+--empty void
+--commas always
+--semicolons never
+--patternlet inline
+--disable redundantSelf,trailingCommas

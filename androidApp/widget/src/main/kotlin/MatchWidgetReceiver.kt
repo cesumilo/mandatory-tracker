@@ -1,9 +1,7 @@
 package com.valoranttracker.app.widget
 
-import android.content.Context
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
-import com.valoranttracker.app.widget.MatchWidget
 
 class MatchWidgetReceiver : GlanceAppWidgetReceiver() {
     override val glanceAppWidget: GlanceAppWidget = MatchWidget()

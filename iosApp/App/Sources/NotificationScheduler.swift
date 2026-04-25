@@ -1,6 +1,6 @@
 import Foundation
-import UserNotifications
 import UIKit
+import UserNotifications
 
 class NotificationScheduler {
     static let shared = NotificationScheduler()
@@ -18,7 +18,7 @@ class NotificationScheduler {
 
     func scheduleNotificationsIfNeeded() {
         fetchNextMatch { [weak self] match in
-            guard let self = self, let match = match else { return }
+            guard let self, let match else { return }
 
             self.cancelExistingNotifications()
 
@@ -41,9 +41,10 @@ class NotificationScheduler {
         }
 
         URLSession.shared.dataTask(with: url) { data, _, _ in
-            guard let data = data,
+            guard let data,
                   let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                  let matches = json["data"] as? [[String: Any]] else {
+                  let matches = json["data"] as? [[String: Any]]
+            else {
                 completion(nil)
                 return
             }
@@ -94,7 +95,7 @@ class NotificationScheduler {
         )
 
         center.add(request) { error in
-            if let error = error {
+            if let error {
                 print("Failed to schedule notification: \(error.localizedDescription)")
             } else {
                 print("Notification scheduled for \(triggerDate)")
@@ -106,7 +107,7 @@ class NotificationScheduler {
         let center = UNUserNotificationCenter.current()
         center.getPendingNotificationRequests { requests in
             let matchNotifications = requests.filter { $0.identifier.hasPrefix("match-notification-") }
-            let identifiers = matchNotifications.map { $0.identifier }
+            let identifiers = matchNotifications.map(\.identifier)
             center.removePendingNotificationRequests(withIdentifiers: identifiers)
         }
     }

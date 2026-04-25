@@ -1,0 +1,33 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-added-large-files
+
+  - repo: local
+    hooks:
+      - id: lint-kotlin
+        name: Lint Kotlin (ktlint)
+        entry: ./gradlew -q ktlintCheck
+        language: system
+        types: [kotlin]
+        pass_filenames: false
+        files: '.*\.kt$'
+
+      - id: lint-swift
+        name: Lint Swift (swiftlint)
+        entry: swiftlint lint --config .swiftlint.yml
+        language: system
+        types: [swift]
+        pass_filenames: false
+        files: '.*\.swift$'
+
+      - id: format-swift
+        name: Format Swift (swiftformat)
+        entry: swiftformat --config .swiftformat.yml .
+        language: system
+        types: [swift]
+        pass_filenames: false
+        files: '.*\.swift$'

@@ -1,8 +1,8 @@
 package com.valoranttracker.shared.data.dto
 
+import com.valoranttracker.shared.domain.model.MatchStatus
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import com.valoranttracker.shared.domain.model.MatchStatus
 
 @Serializable
 data class MatchDto(
@@ -44,32 +44,35 @@ data class ResultsResponse(
 )
 
 fun MatchDto.toDomain(): com.valoranttracker.shared.domain.model.UpcomingMatch {
-    val domainStatus = when (status.lowercase()) {
-        "live" -> MatchStatus.LIVE
-        "upcoming" -> MatchStatus.UPCOMING
-        "completed", "finished" -> MatchStatus.COMPLETED
-        else -> MatchStatus.UNKNOWN
-    }
+    val domainStatus =
+        when (status.lowercase()) {
+            "live" -> MatchStatus.LIVE
+            "upcoming" -> MatchStatus.UPCOMING
+            "completed", "finished" -> MatchStatus.COMPLETED
+            else -> MatchStatus.UNKNOWN
+        }
 
     val team1Dto = teams.getOrNull(0)
     val team2Dto = teams.getOrNull(1)
 
     return com.valoranttracker.shared.domain.model.UpcomingMatch(
         id = id,
-        team1 = com.valoranttracker.shared.domain.model.TeamRef(
-            id = team1Dto?.id ?: "",
-            name = team1Dto?.name ?: "",
-            logoUrl = team1Dto?.logo,
-            country = team1Dto?.country,
-            score = team1Dto?.score,
-        ),
-        team2 = com.valoranttracker.shared.domain.model.TeamRef(
-            id = team2Dto?.id ?: "",
-            name = team2Dto?.name ?: "",
-            logoUrl = team2Dto?.logo,
-            country = team2Dto?.country,
-            score = team2Dto?.score,
-        ),
+        team1 =
+            com.valoranttracker.shared.domain.model.TeamRef(
+                id = team1Dto?.id ?: "",
+                name = team1Dto?.name ?: "",
+                logoUrl = team1Dto?.logo,
+                country = team1Dto?.country,
+                score = team1Dto?.score,
+            ),
+        team2 =
+            com.valoranttracker.shared.domain.model.TeamRef(
+                id = team2Dto?.id ?: "",
+                name = team2Dto?.name ?: "",
+                logoUrl = team2Dto?.logo,
+                country = team2Dto?.country,
+                score = team2Dto?.score,
+            ),
         eventName = event,
         tournament = tournament,
         status = domainStatus,
@@ -94,28 +97,31 @@ fun MatchDto.toCompletedDomain(): com.valoranttracker.shared.domain.model.Comple
     val team1Dto = teams.getOrNull(0)
     val team2Dto = teams.getOrNull(1)
 
-    val winnerId = when {
-        team1Dto?.won == true -> team1Dto.id
-        team2Dto?.won == true -> team2Dto.id
-        else -> null
-    }
+    val winnerId =
+        when {
+            team1Dto?.won == true -> team1Dto.id
+            team2Dto?.won == true -> team2Dto.id
+            else -> null
+        }
 
     return com.valoranttracker.shared.domain.model.CompletedMatch(
         id = id,
-        team1 = com.valoranttracker.shared.domain.model.TeamRef(
-            id = team1Dto?.id ?: "",
-            name = team1Dto?.name ?: "",
-            logoUrl = team1Dto?.logo,
-            country = team1Dto?.country,
-            score = team1Dto?.score,
-        ),
-        team2 = com.valoranttracker.shared.domain.model.TeamRef(
-            id = team2Dto?.id ?: "",
-            name = team2Dto?.name ?: "",
-            logoUrl = team2Dto?.logo,
-            country = team2Dto?.country,
-            score = team2Dto?.score,
-        ),
+        team1 =
+            com.valoranttracker.shared.domain.model.TeamRef(
+                id = team1Dto?.id ?: "",
+                name = team1Dto?.name ?: "",
+                logoUrl = team1Dto?.logo,
+                country = team1Dto?.country,
+                score = team1Dto?.score,
+            ),
+        team2 =
+            com.valoranttracker.shared.domain.model.TeamRef(
+                id = team2Dto?.id ?: "",
+                name = team2Dto?.name ?: "",
+                logoUrl = team2Dto?.logo,
+                country = team2Dto?.country,
+                score = team2Dto?.score,
+            ),
         eventName = event,
         tournament = tournament,
         status = MatchStatus.COMPLETED,

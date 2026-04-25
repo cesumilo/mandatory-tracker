@@ -25,6 +25,8 @@
 - iOS deployment target: 17.0 (for containerBackground)
 - iOS: BGTaskScheduler for background refresh + UNCalendarNotificationTrigger for 1h-before notifications
 - Background color: `#0D0D0D` (DarkBackground) used in both theme and MainActivity
+- Pre-commit: `pre-commit` framework with swiftlint, swiftformat, and ktlint hooks
+  - ktlint v12.1.1 with disabled rules: `no-wildcard-imports`, `function-naming`
 
 ## 📜 Task Log
 
@@ -90,6 +92,11 @@
 - iOS pull-to-refresh: .refreshable modifier (built-in SwiftUI)
 - iOS: UNCalendarNotificationTrigger for scheduled notifications (date-based)
 - iOS: BGTaskScheduler.register + BGAppRefreshTask for background sync
+
+- Pre-commit hooks: Uses pre-commit framework (.pre-commit-config.yaml)
+  - Hooks: trailing-whitespace, end-of-file-fixer, swiftlint, swiftformat
+  - Run manually: `venv/bin/pre-commit run --all-files`
+  - Auto-installs git hook on `git commit`
 
 ## ❓ Open Questions & Follow-ups
 

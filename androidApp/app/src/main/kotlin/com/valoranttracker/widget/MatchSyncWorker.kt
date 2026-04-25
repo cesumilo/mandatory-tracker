@@ -2,31 +2,30 @@ package com.valoranttracker.app.widget
 
 import android.content.Context
 import androidx.work.*
-import com.valoranttracker.app.R
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.SerialName
-import kotlinx.serialization.json.Json
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 import java.util.concurrent.TimeUnit
 
 class MatchSyncWorker(
     private val context: Context,
     workerParams: WorkerParameters,
 ) : CoroutineWorker(context, workerParams) {
-
-    override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
-        try {
-            fetchAndUpdateWidget()
-            Result.success()
-        } catch (e: Exception) {
-            if (runAttemptCount < 3) {
-                Result.retry()
-            } else {
-                Result.failure()
+    override suspend fun doWork(): Result =
+        withContext(Dispatchers.IO) {
+            try {
+                fetchAndUpdateWidget()
+                Result.success()
+            } catch (e: Exception) {
+                if (runAttemptCount < 3) {
+                    Result.retry()
+                } else {
+                    Result.failure()
+                }
             }
         }
-    }
 
     private suspend fun fetchAndUpdateWidget() {
         try {
@@ -35,31 +34,33 @@ class MatchSyncWorker(
             client.setRequestProperty("User-Agent", "ValorantWidget/1.0")
             client.connectTimeout = 10000
             client.readTimeout = 10000
-            
+
             val response = client.inputStream.bufferedReader().readText()
             client.disconnect()
-            
+
             val json = Json { ignoreUnknownKeys = true }
             val data = json.decodeFromString<ApiResponse>(response)
-            
+
             val teamId = "7967"
-            val upcomingMatch = data.data
-                .filter { it.status.equals("Upcoming", ignoreCase = true) }
-                .find { match -> 
-                    match.teams.any { team -> team.id == teamId }
-                }
-            
+            val upcomingMatch =
+                data.data
+                    .filter { it.status.equals("Upcoming", ignoreCase = true) }
+                    .find { match ->
+                        match.teams.any { team -> team.id == teamId }
+                    }
+
             if (upcomingMatch != null) {
-                val opponent = upcomingMatch.teams
-                    .find { it.id != teamId }?.name
-                    ?: "TBD"
-                
+                val opponent =
+                    upcomingMatch.teams
+                        .find { it.id != teamId }?.name
+                        ?: "TBD"
+
                 MatchWidget.updateWidget(
                     context = context,
                     opponent = opponent,
                     event = upcomingMatch.event,
                     timeUntil = upcomingMatch.timeUntil,
-                    tournament = upcomingMatch.tournament
+                    tournament = upcomingMatch.tournament,
                 )
             }
         } catch (e: Exception) {
@@ -71,18 +72,22 @@ class MatchSyncWorker(
         const val WORK_NAME = "match_sync_worker"
 
         fun buildRequest(): PeriodicWorkRequest {
-            val constraints = Constraints.Builder()
-                .setRequiredNetworkType(NetworkType.CONNECTED)
-                .build()
+            val constraints =
+                Constraints.Builder()
+                    .setRequiredNetworkType(NetworkType.CONNECTED)
+                    .build()
 
             return PeriodicWorkRequestBuilder<MatchSyncWorker>(
-                30, TimeUnit.MINUTES,
-                15, TimeUnit.MINUTES
+                30,
+                TimeUnit.MINUTES,
+                15,
+                TimeUnit.MINUTES,
             )
                 .setConstraints(constraints)
                 .setBackoffCriteria(
                     BackoffPolicy.EXPONENTIAL,
-                    30, TimeUnit.MINUTES
+                    30,
+                    TimeUnit.MINUTES,
                 )
                 .build()
         }
@@ -91,18 +96,19 @@ class MatchSyncWorker(
             WorkManager.getInstance(context).enqueueUniquePeriodicWork(
                 WORK_NAME,
                 ExistingPeriodicWorkPolicy.KEEP,
-                buildRequest()
+                buildRequest(),
             )
         }
 
         fun requestImmediate(context: Context) {
-            val request = OneTimeWorkRequestBuilder<MatchSyncWorker>()
-                .setConstraints(
-                    Constraints.Builder()
-                        .setRequiredNetworkType(NetworkType.CONNECTED)
-                        .build()
-                )
-                .build()
+            val request =
+                OneTimeWorkRequestBuilder<MatchSyncWorker>()
+                    .setConstraints(
+                        Constraints.Builder()
+                            .setRequiredNetworkType(NetworkType.CONNECTED)
+                            .build(),
+                    )
+                    .build()
 
             WorkManager.getInstance(context).enqueue(request)
         }
@@ -113,7 +119,7 @@ class MatchSyncWorker(
 data class ApiResponse(
     val status: String = "",
     val size: Int = 0,
-    val data: List<MatchData> = emptyList()
+    val data: List<MatchData> = emptyList(),
 )
 
 @Serializable
@@ -126,7 +132,7 @@ data class MatchData(
     val img: String? = null,
     @SerialName("in")
     val timeUntil: String = "",
-    val timestamp: Long = 0L
+    val timestamp: Long = 0L,
 )
 
 @Serializable
@@ -135,5 +141,5 @@ data class TeamData(
     val name: String = "",
     val country: String? = null,
     val score: String? = null,
-    val logo: String? = null
+    val logo: String? = null,
 )

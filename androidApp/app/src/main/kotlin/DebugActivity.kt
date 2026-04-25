@@ -30,23 +30,26 @@ fun DebugScreen() {
         topBar = {
             TopAppBar(
                 title = { Text("Debug Info") },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer
-                )
+                colors =
+                    TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    ),
             )
-        }
+        },
     ) { padding ->
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Card(
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant
-                )
+                colors =
+                    CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    ),
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text("Sync State", style = MaterialTheme.typography.titleMedium)
@@ -64,7 +67,7 @@ fun DebugScreen() {
                     // TODO: Connect to repository
                     refreshState = "Sync completed"
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             ) {
                 Text("Force Refresh")
             }
@@ -73,7 +76,7 @@ fun DebugScreen() {
                 onClick = {
                     refreshState = "Cleared cache"
                 },
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             ) {
                 Text("Clear Cache")
             }
