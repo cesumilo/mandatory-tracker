@@ -78,6 +78,6 @@ jobs:
         run: cd iosApp && xcodegen generate
 
       - name: Build iOS
-        run: cd iosApp && xcodebuild -project iosApp.xcodeproj -scheme ValorantTracker -configuration Debug -destination 'platform=iOS Simulator,name=iPhone 16' build
+        run: cd iosApp && xcodebuild -project iosApp.xcodeproj -scheme ValorantTracker -configuration Debug -destination 'generic/platform=iOS' build
         env:
           CI: true
