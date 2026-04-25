@@ -6,10 +6,10 @@
 ## 📌 Current State Summary
 
 - Project phase: **Fully functional** - Android and iOS apps with home screen
-- Implementation status: Android app shows upcoming matches and past results on home screen
+- Implementation status: Android app shows upcoming matches and past results with shimmer loading UI
 - APK output: `androidApp/app/build/outputs/apk/debug/app-debug.apk` (~11MB)
 - iOS project: `iosApp/iosApp.xcodeproj`
-- Home screen: Shows upcoming matches (all) + latest results (up to 10), pull-to-refresh, date/time display
+- Home screen: Shows upcoming matches + latest results with pull-to-refresh (no refresh button), shimmer cards during loading
 
 ## 🏛️ Architectural Decisions
 
@@ -52,6 +52,12 @@
   - Results endpoint is paginated (pages 2-5 have Mandatory matches)
   - Added @Serializable to app data classes for JSON parsing
 
+- **2026-04-25** — Home Screen UX Improvements — ✅ Done
+  - Added shimmer loading cards (3 for upcoming + 3 for results sections)
+  - Removed debug text "Upcoming: X, Past: Y"
+  - Replaced refresh button with pull-to-refresh (PullToRefreshBox)
+  - Updated Compose BOM from 2024.02.00 to 2024.09.00 (for PullToRefreshBox support)
+
 ## 🔍 Discoveries & Learnings
 
 - vlr.orlandomm.net /results endpoint is paginated - page 1 has no matches, pages 2+ have data
@@ -64,6 +70,8 @@
 - SCHEDULE_EXACT_ALARM and USE_EXACT_ALARM permissions needed for precise notification timing on Android 12+
 - AlarmManager.setExactAndAllowWhileIdle for exact alarm scheduling
 - AppWidgetManager.ACTION_APPWIDGET_PICK opens widget picker
+- PullToRefreshBox requires Compose BOM 2024.06.00+ (2024.09.00 used)
+- Shimmer effect implemented with Brush.linearGradient + infiniteRepeatable animation
 
 ## ❓ Open Questions & Follow-ups
 
