@@ -5,10 +5,11 @@
 
 ## 📌 Current State Summary
 
-- Project phase: **Fully functional** - Android and iOS apps working
-- Implementation status: Both Android and iOS apps functional with widgets and notifications
+- Project phase: **Fully functional** - Android and iOS apps with home screen
+- Implementation status: Android app shows upcoming matches and past results on home screen
 - APK output: `androidApp/app/build/outputs/apk/debug/app-debug.apk` (~11MB)
 - iOS project: `iosApp/iosApp.xcodeproj`
+- Home screen: Shows upcoming matches (all) + latest results (up to 10), pull-to-refresh, date/time display
 
 ## 🏛️ Architectural Decisions
 
@@ -44,8 +45,18 @@
   - iOS: Added URL scheme "valoranttracker://"
   - iOS: Now using MandatoryLogo from assets (cleaner implementation)
 
+- **2026-04-25** — Home Screen: Upcoming + Results — ✅ Done
+  - Added home screen showing upcoming matches and latest results
+  - Added match date/time display (converted from timestamp)
+  - Fixed score ordering (opponent - our team)
+  - Results endpoint is paginated (pages 2-5 have Mandatory matches)
+  - Added @Serializable to app data classes for JSON parsing
+
 ## 🔍 Discoveries & Learnings
 
+- vlr.orlandomm.net /results endpoint is paginated - page 1 has no matches, pages 2+ have data
+- Match.score displayed as "opponentScore - ourScore" to match visual left-right layout
+- Must use @kotlinx.serialization.Serializable annotation for data classes in app module
 - iOS: Must use @UIApplicationDelegateAdaptor for UNUserNotificationCenterDelegate to work
 - iOS: AuthorizationStatus 2 = denied, 1 = authorized, 0 = notDetermined
 - iOS: setDelegate() in init() may be too late - use @UIApplicationDelegateAdaptor
