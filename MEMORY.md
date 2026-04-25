@@ -5,11 +5,14 @@
 
 ## 📌 Current State Summary
 
-- Project phase: **Fully functional** - Android and iOS apps with home screen
-- Implementation status: Android app shows upcoming matches and past results with shimmer loading UI
+- Project phase: **Fully functional** - Android and iOS apps with full home screen UI
+- Implementation status: Android/iOS apps show upcoming matches, past results, shimmer loading, pull-to-refresh
 - APK output: `androidApp/app/build/outputs/apk/debug/app-debug.apk` (~11MB)
 - iOS project: `iosApp/iosApp.xcodeproj`
-- Home screen: Shows upcoming matches + latest results with pull-to-refresh (no refresh button), shimmer cards during loading
+- Both platforms: Full home screen with pull-to-refresh, shimmer loading cards
+- Android: MatchNotificationWorker schedules alarms 1h before match
+- iOS: NotificationScheduler with BGTaskScheduler for background refresh
+- Background color: Dark (`#0D0D0D`) consistent across safe/unsafe areas
 
 ## 🏛️ Architectural Decisions
 
@@ -20,6 +23,8 @@
 - Periodic WorkManager for sync (30min intervals)
 - AlarmManager + BroadcastReceiver for exact notification timing (1h before match)
 - iOS deployment target: 17.0 (for containerBackground)
+- iOS: BGTaskScheduler for background refresh + UNCalendarNotificationTrigger for 1h-before notifications
+- Background color: `#0D0D0D` (DarkBackground) used in both theme and MainActivity
 
 ## 📜 Task Log
 
@@ -58,6 +63,15 @@
   - Replaced refresh button with pull-to-refresh (PullToRefreshBox)
   - Updated Compose BOM from 2024.02.00 to 2024.09.00 (for PullToRefreshBox support)
 
+- **2026-04-25** — iOS Home Screen & Notification Implementation — ✅ Done
+  - Created ContentView.swift matching Android MainActivity UI (upcoming matches, results, shimmer)
+  - Created NotificationScheduler.swift (mirrors MatchNotificationWorker logic)
+  - Created BackgroundTaskManager.swift (mirrors WorkManager periodic sync)
+  - iOS notifications scheduled 1h before match using UNCalendarNotificationTrigger
+  - Background refresh using BGTaskScheduler
+  - Added BGTaskSchedulerPermittedIdentifiers and UIBackgroundModes to Info.plist
+  - Pull-to-refresh implemented via .refreshable modifier
+
 ## 🔍 Discoveries & Learnings
 
 - vlr.orlandomm.net /results endpoint is paginated - page 1 has no matches, pages 2+ have data
@@ -72,6 +86,10 @@
 - AppWidgetManager.ACTION_APPWIDGET_PICK opens widget picker
 - PullToRefreshBox requires Compose BOM 2024.06.00+ (2024.09.00 used)
 - Shimmer effect implemented with Brush.linearGradient + infiniteRepeatable animation
+- iOS shimmer: LinearGradient with AnimatableOffset, .linear(duration: 1.2).repeatForever
+- iOS pull-to-refresh: .refreshable modifier (built-in SwiftUI)
+- iOS: UNCalendarNotificationTrigger for scheduled notifications (date-based)
+- iOS: BGTaskScheduler.register + BGAppRefreshTask for background sync
 
 ## ❓ Open Questions & Follow-ups
 

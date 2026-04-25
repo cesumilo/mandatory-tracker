@@ -17,6 +17,16 @@ struct ValorantTrackerApp: App {
 class AppDelegate: NSObject, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]?) -> Bool {
         UNUserNotificationCenter.current().delegate = self
+
+        BackgroundTaskManager.shared.registerBackgroundTasks()
+        BackgroundTaskManager.shared.scheduleAppRefresh()
+
+        NotificationScheduler.shared.requestPermission { granted in
+            if granted {
+                NotificationScheduler.shared.scheduleNotificationsIfNeeded()
+            }
+        }
+
         return true
     }
 }
