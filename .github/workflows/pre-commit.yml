@@ -18,8 +18,50 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install pre-commit pyyaml
+          pip install pre-commit
           pre-commit install
 
       - name: Run pre-commit
         run: pre-commit run --all-files
+
+  ktlint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Gradle
+        run: |
+          curl -sL https://services.gradle.org/distributions/gradle-8.9-bin.zip -o gradle.zip
+          unzip -q gradle.zip
+          echo "./gradle/bin/gradle" >> $GITHUB_PATH
+
+      - name: Run ktlint
+        run: ./gradlew ktlintCheck --no-daemon
+
+  swiftlint:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Xcode
+        run: sudo xcode-select -s /Applications/Xcode_16.2.app
+
+      - name: Install swiftlint
+        run: brew install swiftlint
+
+      - name: Install swiftformat
+        run: brew install swiftformat
+
+      - name: Run swiftlint
+        run: swiftlint lint --config .swiftlint.yml
+
+      - name: Run swiftformat
+        run: swiftformat --config .swiftformat.yml .

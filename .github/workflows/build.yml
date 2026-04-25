@@ -19,8 +19,14 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Gradle Wrapper
-        uses: gradle/wrapper-action@v3
+      - name: Setup Gradle
+        run: |
+          if [ ! -f "./gradlew" ]; then
+            curl -sL https://services.gradle.org/distributions/gradle-8.9-bin.zip -o gradle.zip
+            unzip -q gradle.zip
+            mv gradle-8.9 gradle
+          fi
+          echo "./gradle/bin/gradle" >> $GITHUB_PATH
 
       - name: Build shared module
         run: ./gradlew :shared:compileDebugKotlinAndroid --no-daemon
@@ -38,8 +44,14 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Gradle Wrapper
-        uses: gradle/wrapper-action@v3
+      - name: Setup Gradle
+        run: |
+          if [ ! -f "./gradlew" ]; then
+            curl -sL https://services.gradle.org/distributions/gradle-8.9-bin.zip -o gradle.zip
+            unzip -q gradle.zip
+            mv gradle-8.9 gradle
+          fi
+          echo "./gradle/bin/gradle" >> $GITHUB_PATH
 
       - name: Build Android app
         run: ./gradlew :androidApp:app:assembleDebug --no-daemon
@@ -58,6 +70,9 @@ jobs:
 
       - name: Setup Xcode
         run: sudo xcode-select -s /Applications/Xcode_16.2.app
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
 
       - name: Generate Xcode project
         run: cd iosApp && xcodegen generate
