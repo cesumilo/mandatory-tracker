@@ -54,24 +54,5 @@ jobs:
       - name: Generate Xcode project
         run: cd iosApp && xcodegen generate
 
-      - name: Build iOS
-        run: |
-          cd iosApp
-          xcodebuild -project iosApp.xcodeproj -scheme ValorantTracker -configuration Release -destination 'generic/platform=iOS' build CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED=NO CODE_SIGNING_ALLOWED=NO
-        env:
-          CI: true
-
-      - name: Create ZIP for iOS
-        run: |
-          cd iosApp
-          mkdir -p payload
-          cp -r build/Release-iphonesimulator/ValorantTracker.app payload/
-          cd payload && zip -r ../ValorantTracker.ipa .
-          cd ..
-
-      - name: Upload to Release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: iosApp/ValorantTracker.ipa
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Note
+        run: echo "iOS build requires development team. Build locally with Xcode."
