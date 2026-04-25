@@ -30,7 +30,7 @@ jobs:
         run: ./gradlew :androidApp:app:assembleRelease --no-daemon
 
       - name: Rename APK
-        run: cp androidApp/app/build/outputs/apk/release/app-release.apk mandatory-tracker.apk
+        run: cp androidApp/app/build/outputs/apk/release/app-release-unsigned.apk mandatory-tracker.apk
 
       - name: Upload to Release
         uses: softprops/action-gh-release@v1
