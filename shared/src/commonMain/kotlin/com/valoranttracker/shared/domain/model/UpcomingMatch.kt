@@ -29,6 +29,21 @@ data class UpcomingMatch(
 )
 
 @Serializable
+data class CompletedMatch(
+    val id: String,
+    val team1: TeamRef,
+    val team2: TeamRef,
+    val eventName: String,
+    val tournament: String,
+    val status: MatchStatus,
+    val rawTimeLabel: String,
+    val matchImageUrl: String?,
+    val winnerTeamId: String?,
+) {
+    fun isWinner(teamId: String): Boolean = winnerTeamId == teamId
+}
+
+@Serializable
 data class TeamRef(
     val id: String,
     val name: String,
