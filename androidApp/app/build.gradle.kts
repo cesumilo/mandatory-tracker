@@ -53,6 +53,7 @@ dependencies {
     implementation("androidx.compose.material3:material3")
     implementation("androidx.activity:activity-compose")
     implementation("androidx.compose.runtime:runtime")
+    implementation("androidx.compose.animation:animation")
     implementation("androidx.work:work-runtime-ktx:2.10.0")
     implementation("androidx.core:core:1.15.0")
     implementation("io.coil-kt:coil-compose:2.5.0")
