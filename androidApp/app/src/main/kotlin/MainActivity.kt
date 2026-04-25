@@ -20,7 +20,16 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -59,6 +68,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -66,14 +76,13 @@ class MainActivity : ComponentActivity() {
                 val context = LocalContext.current
                 val scope = rememberCoroutineScope()
                 val teamId = "7967"
-                
+
                 var isLoading by remember { mutableStateOf(true) }
                 var isRefreshing by remember { mutableStateOf(false) }
                 var upcomingMatches by remember { mutableStateOf<List<MatchData>>(emptyList()) }
                 var pastMatches by remember { mutableStateOf<List<MatchData>>(emptyList()) }
                 var notificationStatus by remember { mutableStateOf<String?>(null) }
-                var debugInfo by remember { mutableStateOf<String?>(null) }
-                
+
                 fun refresh() {
                     scope.launch {
                         isRefreshing = true
@@ -82,22 +91,19 @@ class MainActivity : ComponentActivity() {
                                 fetchUpcomingMatches(teamId)
                             }
                             upcomingMatches = matches
-                            
+
                             val results = withContext(Dispatchers.IO) {
                                 fetchPastMatches(teamId)
                             }
                             pastMatches = results
-                            
-                            debugInfo = "Upcoming: ${upcomingMatches.size}, Past: ${pastMatches.size}"
                         } catch (e: Exception) {
-                            debugInfo = "Error: ${e.message}"
                         } finally {
                             isRefreshing = false
                             isLoading = false
                         }
                     }
                 }
-                
+
                 LaunchedEffect(Unit) {
                     try {
                         val info = getNextMatchInfo(context)
@@ -109,11 +115,11 @@ class MainActivity : ComponentActivity() {
                     }
                     refresh()
                 }
-                
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(DarkBackground)
+
+                PullToRefreshBox(
+                    isRefreshing = isRefreshing,
+                    onRefresh = { refresh() },
+                    modifier = Modifier.fillMaxSize().background(DarkBackground)
                 ) {
                     LazyColumn(
                         modifier = Modifier
@@ -123,10 +129,7 @@ class MainActivity : ComponentActivity() {
                     ) {
                         item {
                             HeaderSection(
-                                notificationStatus = notificationStatus,
-                                debugInfo = debugInfo,
-                                onRefresh = { refresh() },
-                                isRefreshing = isRefreshing
+                                notificationStatus = notificationStatus
                             )
                         }
 
@@ -178,13 +181,10 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-    
+
     @Composable
     private fun HeaderSection(
-        notificationStatus: String?,
-        debugInfo: String?,
-        onRefresh: () -> Unit,
-        isRefreshing: Boolean
+        notificationStatus: String?
     ) {
         Column(
             modifier = Modifier.fillMaxWidth(),
@@ -215,22 +215,6 @@ class MainActivity : ComponentActivity() {
                     fontSize = 12.sp,
                     color = MandatoryRed.copy(alpha = 0.8f)
                 )
-            }
-            debugInfo?.let {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = it,
-                    fontSize = 11.sp,
-                    color = Color.Yellow
-                )
-            }
-            Spacer(modifier = Modifier.height(12.dp))
-            Button(
-                onClick = onRefresh,
-                enabled = !isRefreshing,
-                colors = ButtonDefaults.buttonColors(containerColor = MandatoryRed)
-            ) {
-                Text(if (isRefreshing) "Loading..." else "Refresh")
             }
         }
     }
