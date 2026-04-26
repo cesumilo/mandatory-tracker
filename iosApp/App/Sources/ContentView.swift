@@ -22,7 +22,12 @@ struct ContentView: View {
 
                 ScrollView {
                     VStack(spacing: 16) {
-                        HeaderSection(notificationStatus: notificationStatus)
+                        HeaderSection(notificationStatus: notificationStatus) {
+                            Task {
+                                NotificationScheduler.shared.scheduleNotificationsIfNeeded()
+                                WidgetCenter.shared.reloadAllTimelines()
+                            }
+                        }
 
                         if isLoading || isRefreshing {
                             SectionTitle("UPCOMING MATCHES")
@@ -241,11 +246,29 @@ struct ContentView: View {
 
 struct HeaderSection: View {
     let notificationStatus: String?
+    let onRefresh: () -> Void
 
+    @State private var isRefreshing = false
     private let mandatoryRed = Color(red: 1.0, green: 0.17, blue: 0.17)
 
     var body: some View {
         VStack(spacing: 8) {
+            HStack {
+                Spacer()
+                Button(action: {
+                    isRefreshing = true
+                    onRefresh()
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                        isRefreshing = false
+                    }
+                }) {
+                    Image(systemName: "arrow.clockwise")
+                        .foregroundColor(isRefreshing ? mandatoryRed : .white.opacity(0.7))
+                        .font(.system(size: 20))
+                }
+            }
+            .padding(.horizontal, 16)
+
             Image("MandatoryLogo")
                 .resizable()
                 .scaledToFit()
@@ -265,6 +288,14 @@ struct HeaderSection: View {
                 Text(status)
                     .font(.system(size: 12))
                     .foregroundColor(mandatoryRed.opacity(0.8))
+            }
+
+            if isRefreshing {
+                Spacer()
+                    .frame(height: 4)
+                Text("Refreshing...")
+                    .font(.system(size: 10))
+                    .foregroundColor(.white.opacity(0.5))
             }
         }
         .frame(maxWidth: .infinity)

@@ -13,6 +13,7 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -20,6 +21,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.darkColorScheme
@@ -40,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.valoranttracker.app.widget.MatchNotificationWorker
+import com.valoranttracker.app.widget.MatchSyncWorker
 import com.valoranttracker.app.widget.getNextMatchInfo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -125,6 +129,10 @@ class MainActivity : ComponentActivity() {
                         item {
                             HeaderSection(
                                 notificationStatus = notificationStatus,
+                                onRefresh = {
+                                    MatchSyncWorker.requestImmediate(context)
+                                    MatchNotificationWorker.schedule(context)
+                                },
                             )
                         }
 
@@ -178,17 +186,44 @@ class MainActivity : ComponentActivity() {
     }
 
     @Composable
-    private fun HeaderSection(notificationStatus: String?) {
+    private fun HeaderSection(
+        notificationStatus: String?,
+        onRefresh: () -> Unit,
+    ) {
+        var showRefreshing by remember { mutableStateOf(false) }
+        LaunchedEffect(showRefreshing) {
+            if (showRefreshing) {
+                kotlinx.coroutines.delay(2000)
+                showRefreshing = false
+            }
+        }
         Column(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Image(
-                painter = painterResource(R.drawable.mandatory_logo),
-                contentDescription = "Mandatory Logo",
-                modifier = Modifier.size(80.dp),
-                contentScale = ContentScale.Fit,
-            )
+            Box(modifier = Modifier.fillMaxWidth()) {
+                Image(
+                    painter = painterResource(R.drawable.mandatory_logo),
+                    contentDescription = "Mandatory Logo",
+                    modifier = Modifier.size(80.dp).align(Alignment.Center),
+                    contentScale = ContentScale.Fit,
+                )
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .clickable {
+                            showRefreshing = true
+                            onRefresh()
+                        }
+                        .padding(8.dp),
+                ) {
+                    Text(
+                        text = "↻",
+                        fontSize = 24.sp,
+                        color = if (showRefreshing) MandatoryRed else Color.White.copy(alpha = 0.7f),
+                    )
+                }
+            }
             Spacer(modifier = Modifier.height(8.dp))
             Text(
                 text = "MANDATORY",
@@ -207,6 +242,14 @@ class MainActivity : ComponentActivity() {
                     text = it,
                     fontSize = 12.sp,
                     color = MandatoryRed.copy(alpha = 0.8f),
+                )
+            }
+            if (showRefreshing) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "Refreshing...",
+                    fontSize = 10.sp,
+                    color = Color.White.copy(alpha = 0.5f),
                 )
             }
         }
