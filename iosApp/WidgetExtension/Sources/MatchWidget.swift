@@ -63,7 +63,19 @@ struct MatchProvider: TimelineProvider {
                     let opponentName = opponent?["name"] as? String ?? "TBD"
                     let event = match["event"] as? String ?? ""
                     let tournament = match["tournament"] as? String ?? ""
-                    let timeUntil = match["in"] as? String ?? ""
+                    let timestamp = match["timestamp"] as? Int64 ?? 0
+                    let matchTimeMs = Double(timestamp) * 1000
+                    let now = Date().timeIntervalSince1970 * 1000
+                    let diff = matchTimeMs - now
+                    let hours = Int(diff / (1000 * 60 * 60))
+                    let mins = Int((diff.truncatingRemainder(dividingBy: 1000 * 60 * 60)) / (1000 * 60))
+                    let timeUntil = if hours > 0 {
+                        "\(hours)h \(mins)m"
+                    } else if mins > 0 {
+                        "\(mins)m"
+                    } else {
+                        "now"
+                    }
 
                     return MatchEntry(
                         date: Date(),

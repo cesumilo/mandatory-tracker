@@ -55,11 +55,19 @@ class MatchSyncWorker(
                         .find { it.id != teamId }?.name
                         ?: "TBD"
 
+                val matchTimeMs = upcomingMatch.timestamp * 1000
+                val now = System.currentTimeMillis()
+                val diff = matchTimeMs - now
+                val hours = diff / (1000 * 60 * 60)
+                val mins = (diff % (1000 * 60 * 60)) / (1000 * 60)
+                val timeUntil =
+                    if (hours > 0) "${hours}h ${mins}m" else if (mins > 0) "${mins}m" else "now"
+
                 MatchWidget.updateWidget(
                     context = context,
                     opponent = opponent,
                     event = upcomingMatch.event,
-                    timeUntil = upcomingMatch.timeUntil,
+                    timeUntil = timeUntil,
                     tournament = upcomingMatch.tournament,
                 )
             }

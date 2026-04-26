@@ -13,6 +13,7 @@
 - Android: MatchNotificationWorker schedules alarms 1h before match
 - iOS: NotificationScheduler with BGTaskScheduler for background refresh
 - Background color: Dark (`#0D0D0D`) consistent across safe/unsafe areas
+- Widget: Time-until now correctly computed from `timestamp` (not stale API string)
 
 ## 🏛️ Architectural Decisions
 
@@ -29,6 +30,11 @@
   - ktlint v12.1.1 with disabled rules: `no-wildcard-imports`, `function-naming`
 
 ## 📜 Task Log
+
+- **2026-04-26** — Widget time-off bug fix — ✅ Done
+  - Widget was showing stale `timeUntil` from API string (static at scrape time)
+  - Both Android (MatchSyncWorker) and iOS (MatchWidget) now compute time remaining from `timestamp` using current time
+  - Matches behavior of `getNextMatchInfo()` in MainActivity
 
 - **2026-04-23** — Phase 0: Scaffolding — ✅ Done
 - **2026-04-23** — Phase 1: Shared Domain & Networking — ✅ Done
@@ -97,6 +103,9 @@
   - Hooks: trailing-whitespace, end-of-file-fixer, swiftlint, swiftformat
   - Run manually: `venv/bin/pre-commit run --all-files`
   - Auto-installs git hook on `git commit`
+
+- Widget `timeUntil` uses API's `in` field directly — this is a static string set at scrape time, not time-remaining
+  - Must compute from `timestamp` using current time for accurate countdown
 
 ## ❓ Open Questions & Follow-ups
 
