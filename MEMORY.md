@@ -7,6 +7,8 @@
 
 - Project phase: **Fully functional** - Android and iOS apps with full home screen UI
 - Implementation status: Android/iOS apps show upcoming matches, past results, shimmer loading, pull-to-refresh
+- **New**: Replaced vlresports API with web scraping for better data freshness
+- **Feature**: 1-hour caching policy implemented across both platforms
 - APK output: `androidApp/app/build/outputs/apk/debug/app-debug.apk` (~11MB)
 - iOS project: `iosApp/iosApp.xcodeproj`
 - Both platforms: Full home screen with pull-to-refresh, shimmer loading cards
@@ -41,6 +43,13 @@
   - Fixed Android Glance widget to read actual match data from SharedPreferences instead of hardcoded values
   - Updated widget implementation in androidApp/widget module to match working app widget
   - Widget now properly displays upcoming match information, event details, and time-until
+
+- **2026-04-27** — Web scraping implementation — ✅ Done
+  - Replaced vlresports API with direct vlr.gg web scraping for better data freshness
+  - Implemented 1-hour caching policy for both upcoming matches and recent results
+  - Updated Android MainActivity to parse HTML directly from vlr.gg/team/7967/mandatory
+  - Updated iOS ContentView.swift with same web scraping approach
+  - Both platforms now fetch data directly from source with improved update frequency
 
 - **2026-04-23** — Phase 0: Scaffolding — ✅ Done
 - **2026-04-23** — Phase 1: Shared Domain & Networking — ✅ Done
@@ -116,6 +125,12 @@
 - Android widget has two implementations: app widget (working) and Glance widget (broken with hardcoded data)
   - Fixed by updating Glance widget to read from SharedPreferences like the app widget
   - Widget module must not reference app-specific components like MainActivity
+
+- Web scraping vlr.gg provides more up-to-date data than vlresports API wrapper
+  - Implemented direct HTML parsing for faster data freshness
+  - Added 1-hour caching policy for performance and to avoid rate limiting
+  - Both Android and iOS now use web scraping instead of vlresports API
+  - CSS classes used in parsing: `.m-item-result`, `.m-item-team`, `.m-item-event`, `.rm-item-score-eta`
 
 ## ❓ Open Questions & Follow-ups
 

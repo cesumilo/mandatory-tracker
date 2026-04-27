@@ -57,4 +57,6 @@ dependencies {
     implementation("androidx.work:work-runtime-ktx:2.10.0")
     implementation("androidx.core:core:1.15.0")
     implementation("io.coil-kt:coil-compose:2.5.0")
+    // HTML parsing for web scraping
+    implementation(libs.jsoup)
 }

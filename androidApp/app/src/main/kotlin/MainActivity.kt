@@ -52,7 +52,7 @@ import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.serialization.json.Json
-import java.net.URL
+
 
 class MainActivity : ComponentActivity() {
     private val notificationPermissionLauncher =
@@ -703,60 +703,14 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    private fun fetchUpcomingMatches(teamId: String): List<MatchData> {
-        Log.d("MainActivity", "Fetching upcoming for team $teamId")
-        val url = URL("https://vlr.orlandomm.net/api/v1/matches")
-        val connection = url.openConnection() as java.net.HttpURLConnection
-        connection.setRequestProperty("User-Agent", "ValorantTracker/1.0")
-        connection.connectTimeout = 15000
-        connection.readTimeout = 15000
-        val response = connection.inputStream.bufferedReader().readText()
-        connection.disconnect()
-
-        val json = Json { ignoreUnknownKeys = true }
-        val data = json.decodeFromString<ApiResponse>(response)
-
-        Log.d("MainActivity", "Total matches from API: ${data.data.size}")
-
-        val allUpcoming = data.data.filter { it.status.equals("Upcoming", ignoreCase = true) }
-        Log.d("MainActivity", "Upcoming matches: ${allUpcoming.size}")
-
-        val withTeam = allUpcoming.filter { match -> match.teams.any { team -> team.id == teamId } }
-        Log.d("MainActivity", "Matches with team $teamId: ${withTeam.size}")
-
-        return withTeam.sortedBy { it.timestamp }
+private fun fetchUpcomingMatches(teamId: String): List<MatchData> {
+        Log.d("MainActivity", "Fetching upcoming matches using VlrScraper")
+        return VlrScraper.getUpcomingMatches()
     }
 
     private fun fetchPastMatches(teamId: String): List<MatchData> {
-        Log.d("MainActivity", "Fetching past for team $teamId")
-        val allMatches = mutableListOf<MatchData>()
-
-        for (page in 1..5) {
-            try {
-                val url = URL("https://vlr.orlandomm.net/api/v1/results?page=$page")
-                val connection = url.openConnection() as java.net.HttpURLConnection
-                connection.setRequestProperty("User-Agent", "ValorantTracker/1.0")
-                connection.connectTimeout = 15000
-                connection.readTimeout = 15000
-                val response = connection.inputStream.bufferedReader().readText()
-                connection.disconnect()
-
-                val json = Json { ignoreUnknownKeys = true }
-                val data = json.decodeFromString<ApiResponse>(response)
-
-                if (data.data.isEmpty()) break
-                allMatches.addAll(data.data)
-            } catch (e: Exception) {
-                break
-            }
-        }
-
-        Log.d("MainActivity", "Total results fetched: ${allMatches.size}")
-
-        val withTeam = allMatches.filter { match -> match.teams.any { team -> team.id == teamId } }
-        Log.d("MainActivity", "Results with team $teamId: ${withTeam.size}")
-
-        return withTeam.take(10)
+        Log.d("MainActivity", "Fetching past matches using VlrScraper")
+        return VlrScraper.getPastMatches()
     }
 }
 
