@@ -2,11 +2,9 @@ package com.valoranttracker.app.widget
 
 import android.content.Context
 import androidx.work.*
+import com.valoranttracker.app.VlrScraper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.SerialName
-import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
 import java.util.concurrent.TimeUnit
 
 class MatchSyncWorker(
@@ -29,50 +27,34 @@ class MatchSyncWorker(
 
     private suspend fun fetchAndUpdateWidget() {
         try {
-            val url = java.net.URL("https://vlr.orlandomm.net/api/v1/matches")
-            val client = url.openConnection() as java.net.HttpURLConnection
-            client.setRequestProperty("User-Agent", "ValorantWidget/1.0")
-            client.connectTimeout = 10000
-            client.readTimeout = 10000
+            // Use VlrScraper to get fresh data
+            val upcomingMatches = VlrScraper.getUpcomingMatches(forceRefresh = true)
 
-            val response = client.inputStream.bufferedReader().readText()
-            client.disconnect()
-
-            val json = Json { ignoreUnknownKeys = true }
-            val data = json.decodeFromString<ApiResponse>(response)
-
-            val teamId = "7967"
-            val upcomingMatch =
-                data.data
-                    .filter { it.status.equals("Upcoming", ignoreCase = true) }
-                    .find { match ->
-                        match.teams.any { team -> team.id == teamId }
-                    }
-
-            if (upcomingMatch != null) {
-                val opponent =
-                    upcomingMatch.teams
-                        .find { it.id != teamId }?.name
-                        ?: "TBD"
-
-                val matchTimeMs = upcomingMatch.timestamp * 1000
-                val now = System.currentTimeMillis()
-                val diff = matchTimeMs - now
-                val hours = diff / (1000 * 60 * 60)
-                val mins = (diff % (1000 * 60 * 60)) / (1000 * 60)
-                val timeUntil =
-                    if (hours > 0) "${hours}h ${mins}m" else if (mins > 0) "${mins}m" else "now"
+            if (upcomingMatches.isNotEmpty()) {
+                val firstMatch = upcomingMatches.first()
+                val opponent = firstMatch.teams.getOrNull(1)?.name ?: "TBD"
+                val timeUntil = firstMatch.timeUntil.ifEmpty { "Soon" }
 
                 MatchWidget.updateWidget(
                     context = context,
                     opponent = opponent,
-                    event = upcomingMatch.event,
+                    event = firstMatch.event,
                     timeUntil = timeUntil,
-                    tournament = upcomingMatch.tournament,
+                    tournament = firstMatch.tournament,
+                )
+            } else {
+                // No upcoming matches - show "No upcoming match" state
+                MatchWidget.updateWidget(
+                    context = context,
+                    opponent = null,
+                    event = null,
+                    timeUntil = null,
+                    tournament = null,
                 )
             }
         } catch (e: Exception) {
             // Keep existing data on error
+            android.util.Log.e("MatchSyncWorker", "Error updating widget: ${e.message}")
         }
     }
 
@@ -122,32 +104,3 @@ class MatchSyncWorker(
         }
     }
 }
-
-@Serializable
-data class ApiResponse(
-    val status: String = "",
-    val size: Int = 0,
-    val data: List<MatchData> = emptyList(),
-)
-
-@Serializable
-data class MatchData(
-    val id: String = "",
-    val teams: List<TeamData> = emptyList(),
-    val status: String = "",
-    val event: String = "",
-    val tournament: String = "",
-    val img: String? = null,
-    @SerialName("in")
-    val timeUntil: String = "",
-    val timestamp: Long = 0L,
-)
-
-@Serializable
-data class TeamData(
-    val id: String? = null,
-    val name: String = "",
-    val country: String? = null,
-    val score: String? = null,
-    val logo: String? = null,
-)

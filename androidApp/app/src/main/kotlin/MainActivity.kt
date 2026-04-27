@@ -79,22 +79,31 @@ class MainActivity : ComponentActivity() {
                 var pastMatches by remember { mutableStateOf<List<MatchData>>(emptyList()) }
                 var notificationStatus by remember { mutableStateOf<String?>(null) }
 
-                fun refresh() {
+                fun refresh(force: Boolean = false) {
                     scope.launch {
                         isRefreshing = true
                         try {
                             val matches =
                                 withContext(Dispatchers.IO) {
-                                    fetchUpcomingMatches(teamId)
+                                    if (force) {
+                                        VlrScraper.getUpcomingMatches(forceRefresh = true)
+                                    } else {
+                                        fetchUpcomingMatches(teamId)
+                                    }
                                 }
                             upcomingMatches = matches
 
                             val results =
                                 withContext(Dispatchers.IO) {
-                                    fetchPastMatches(teamId)
+                                    if (force) {
+                                        VlrScraper.getPastMatches(forceRefresh = true)
+                                    } else {
+                                        fetchPastMatches(teamId)
+                                    }
                                 }
                             pastMatches = results
                         } catch (e: Exception) {
+                            Log.e("MainActivity", "Error refreshing: ${e.message}")
                         } finally {
                             isRefreshing = false
                             isLoading = false
@@ -116,7 +125,7 @@ class MainActivity : ComponentActivity() {
 
                 PullToRefreshBox(
                     isRefreshing = isRefreshing,
-                    onRefresh = { refresh() },
+                    onRefresh = { refresh(force = true) },
                     modifier = Modifier.fillMaxSize().background(DarkBackground),
                 ) {
                     LazyColumn(

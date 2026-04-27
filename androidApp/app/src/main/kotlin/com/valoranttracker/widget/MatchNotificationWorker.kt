@@ -11,9 +11,9 @@ import android.os.Build
 import androidx.work.*
 import com.valoranttracker.app.MainActivity
 import com.valoranttracker.app.R
+import com.valoranttracker.app.VlrScraper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.json.Json
 import java.util.concurrent.TimeUnit
 import android.app.Notification as ANotification
 
@@ -33,25 +33,8 @@ class MatchNotificationWorker(
         }
 
     private suspend fun scheduleNextNotification() {
-        val url = java.net.URL("https://vlr.orlandomm.net/api/v1/matches")
-        val client = url.openConnection() as java.net.HttpURLConnection
-        client.setRequestProperty("User-Agent", "ValorantWidget/1.0")
-        client.connectTimeout = 10000
-        client.readTimeout = 10000
-
-        val response = client.inputStream.bufferedReader().readText()
-        client.disconnect()
-
-        val json = Json { ignoreUnknownKeys = true }
-        val data = json.decodeFromString<ApiResponse>(response)
-
-        val teamId = "7967"
-        val nextMatch =
-            data.data
-                .filter { it.status.equals("Upcoming", ignoreCase = true) }
-                .find { match ->
-                    match.teams.any { team -> team.id == teamId }
-                }
+        val upcomingMatches = VlrScraper.getUpcomingMatches()
+        val nextMatch = upcomingMatches.firstOrNull()
 
         if (nextMatch != null) {
             val matchTimeMs = nextMatch.timestamp * 1000
@@ -64,14 +47,15 @@ class MatchNotificationWorker(
             if (nextMatch.id != scheduledMatchId) {
                 cancelExistingAlarm(nextMatch.id)
 
+                val opponent = nextMatch.teams.getOrNull(1)?.name ?: "TBD"
+                val event = nextMatch.event
+
                 when {
                     oneHourBefore > now -> {
                         scheduleExactNotification(
                             nextMatch.id,
-                            nextMatch.event,
-                            nextMatch.teams.find {
-                                it.id != teamId
-                            }?.name ?: "TBD",
+                            event,
+                            opponent,
                             oneHourBefore,
                         )
                         prefs.edit().putString("scheduled_notification_match_id", nextMatch.id).apply()
@@ -79,8 +63,8 @@ class MatchNotificationWorker(
                     matchTimeMs > now -> {
                         showImmediateNotification(
                             nextMatch.id,
-                            nextMatch.event,
-                            nextMatch.teams.find { it.id != teamId }?.name ?: "TBD",
+                            event,
+                            opponent,
                         )
                         prefs.edit().putString("scheduled_notification_match_id", nextMatch.id).apply()
                     }
