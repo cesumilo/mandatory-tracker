@@ -7,8 +7,9 @@
 
 - Project phase: **Fully functional** - Android and iOS apps with full home screen UI
 - Implementation status: Android/iOS apps show upcoming matches, past results, shimmer loading, pull-to-refresh
-- **New**: Replaced vlresports API with web scraping for better data freshness
-- **Feature**: 1-hour caching policy implemented across both platforms
+- **New**: Replaced vlresports API with web scraping for better data freshness using Jsoup (Android) and SwiftSoup (iOS)
+- **Feature**: 1-hour caching policy implemented with separate timestamps for upcoming/completed matches on both platforms
+- **iOS Widget**: 15-minute cache for widget extension with optimized next-match parsing using SwiftSoup
 - APK output: `androidApp/app/build/outputs/apk/debug/app-debug.apk` (~11MB)
 - iOS project: `iosApp/iosApp.xcodeproj`
 - Both platforms: Full home screen with pull-to-refresh, shimmer loading cards
@@ -45,11 +46,34 @@
   - Widget now properly displays upcoming match information, event details, and time-until
 
 - **2026-04-27** — Web scraping implementation — ✅ Done
-  - Replaced vlresports API with direct vlr.gg web scraping for better data freshness
-  - Implemented 1-hour caching policy for both upcoming matches and recent results
-  - Updated Android MainActivity to parse HTML directly from vlr.gg/team/7967/mandatory
-  - Updated iOS ContentView.swift with same web scraping approach
-  - Both platforms now fetch data directly from source with improved update frequency
+  - Created VlrScraper.kt with Jsoup implementation for proper HTML parsing
+  - Parses match items using CSS selectors: `.m-item`, `.m-item-result.mod-tbd`, `.m-item-result.mod-win/.mod-loss`
+  - Extracts date/time from `m-item-date > div` HTML structure with REGEX parsing
+  - Implements 1-hour caching with separate timestamps for upcoming/completed matches
+  - Fixed upcoming match time display: now shows "in 6d 0h at 9:00 pm" instead of "0:00"
+  - Fixed completed match date calculation with proper Calendar logic
+  - JobLife match on 2026-04-26 correctly shows "1d ago" instead of "Today"
+  - Fixed pull-to-refresh to bypass cache with `forceRefresh = true`
+  - Integrated VlrScraper with widget components:
+    - MatchSyncWorker.kt uses VlrScraper.getUpcomingMatches(forceRefresh = true)
+    - MatchInfo.kt uses VlrScraper for getNextMatchInfo()
+    - MatchNotificationWorker.kt uses VlrScraper for scheduling notifications
+  - MainActivity uses VlrScraper instead of API calls for all data fetching
+  - Updated widget to not double-add "in" prefix (already included in scraped data)
+
+- **2026-04-27** — iOS web scraping implementation — ✅ Done
+  - Added SwiftSoup dependency for proper HTML parsing (Swift equivalent of Jsoup)
+  - Created VlrScraper.swift with SwiftSoup HTML parsing (cleaner than regex)
+  - Implements 1-hour caching with separate caches for upcoming/completed matches
+  - Parses match items using CSS selectors: `.m-item`, `.m-item-result.mod-tbd`, `.m-item-result.mod-win/.mod-loss`
+  - Extracts date/time from `m-item-date` element using SwiftSoup text parsing
+  - Updated ContentView.swift to use VlrScraper instead of manual HTML parsing
+  - Updated pull-to-refresh to use `forceRefresh = true` parameter
+  - Created separate VlrScraper.swift for widget extension with 15-minute cache (also uses SwiftSoup)
+  - Updated MatchWidget to use web scraping instead of vlresports API
+  - Updated NotificationScheduler.swift to use VlrScraper for fetching match data
+  - Fixed widget to not double-add "in" prefix (already included in scraped timeUntil)
+  - Both platforms now use consistent web scraping approach with proper HTML parsing libraries
 
 - **2026-04-23** — Phase 0: Scaffolding — ✅ Done
 - **2026-04-23** — Phase 1: Shared Domain & Networking — ✅ Done
@@ -127,10 +151,22 @@
   - Widget module must not reference app-specific components like MainActivity
 
 - Web scraping vlr.gg provides more up-to-date data than vlresports API wrapper
-  - Implemented direct HTML parsing for faster data freshness
-  - Added 1-hour caching policy for performance and to avoid rate limiting
+  - Implemented direct HTML parsing with Jsoup for Android (SwiftSoup for iOS)
+  - Added 1-hour caching policy with separate timestamps for upcoming/completed matches
   - Both Android and iOS now use web scraping instead of vlresports API
-  - CSS classes used in parsing: `.m-item-result`, `.m-item-team`, `.m-item-event`, `.rm-item-score-eta`
+  - HTML structure: https://www.vlr.gg/team/7967/mandatory
+    - Upcoming matches use `.m-item-result.mod-tbd` with `span.rm-item-score-eta` for time until
+    - Completed matches use `.m-item-result.mod-win` or `.mod-loss` with score spans
+    - Date/time in `div.m-item-date > div` (date) and container text after div (time)
+  - Match dates are in 2026 (future), requiring special handling in "ago" calculations
+  - Time parsing issues: had to extract both date and time separately with REGEX due to whitespace/newline formatting
+  - REGEX used: `<div>\s*(\d{4}/\d{2}/\d{2})\s*</div>` for date extraction
+  - Widget stores match data in SharedPreferences under "widget_prefs" for persistence
+  - iOS implementation uses SwiftSoup for HTML parsing (Swift equivalent of Android's Jsoup)
+  - Both platforms now use proper HTML parsing libraries (Jsoup/SwiftSoup) instead of regex
+  - Widget extension has separate VlrScraper implementation (can't share frameworks with main app)
+  - Both main app and widget extension use SwiftSoup for clean, maintainable HTML parsing
+  - iOS notifications now use VlrScraper (with SwiftSoup) for match data instead of vlresports API
 
 ## ❓ Open Questions & Follow-ups
 

@@ -20,9 +20,6 @@ struct MatchEntry: TimelineEntry {
 }
 
 struct MatchProvider: TimelineProvider {
-    private let teamId = "7967"
-    private let apiURL = "https://vlr.orlandomm.net/api/v1/matches"
-
     func placeholder(in _: Context) -> MatchEntry {
         MatchEntry.placeholder
     }
@@ -41,57 +38,19 @@ struct MatchProvider: TimelineProvider {
     }
 
     private func fetchMatchData() async -> MatchEntry {
-        guard let url = URL(string: apiURL) else {
+        // Use VlrScraper to get the next match
+        guard let nextMatch = await VlrScraper.shared.getNextMatch() else {
             return MatchEntry.placeholder
         }
 
-        do {
-            let (data, _) = try await URLSession.shared.data(from: url)
-            guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-                  let matches = json["data"] as? [[String: Any]]
-            else {
-                return MatchEntry.placeholder
-            }
-
-            for match in matches {
-                guard let status = match["status"] as? String,
-                      status == "Upcoming",
-                      let teams = match["teams"] as? [[String: Any]] else { continue }
-
-                if teams.contains(where: { ($0["id"] as? String) == teamId }) {
-                    let opponent = teams.first { ($0["id"] as? String) != teamId }
-                    let opponentName = opponent?["name"] as? String ?? "TBD"
-                    let event = match["event"] as? String ?? ""
-                    let tournament = match["tournament"] as? String ?? ""
-                    let timestamp = match["timestamp"] as? Int64 ?? 0
-                    let matchTimeMs = Double(timestamp) * 1000
-                    let now = Date().timeIntervalSince1970 * 1000
-                    let diff = matchTimeMs - now
-                    let hours = Int(diff / (1000 * 60 * 60))
-                    let mins = Int((diff.truncatingRemainder(dividingBy: 1000 * 60 * 60)) / (1000 * 60))
-                    let timeUntil = if hours > 0 {
-                        "\(hours)h \(mins)m"
-                    } else if mins > 0 {
-                        "\(mins)m"
-                    } else {
-                        "now"
-                    }
-
-                    return MatchEntry(
-                        date: Date(),
-                        opponentName: opponentName,
-                        eventName: event,
-                        tournament: tournament,
-                        timeUntil: timeUntil,
-                        isPlaceholder: false
-                    )
-                }
-            }
-        } catch {
-            // Return placeholder on error
-        }
-
-        return MatchEntry.placeholder
+        return MatchEntry(
+            date: Date(),
+            opponentName: nextMatch.opponentName,
+            eventName: nextMatch.eventName,
+            tournament: nextMatch.tournament,
+            timeUntil: nextMatch.timeUntil,
+            isPlaceholder: false
+        )
     }
 }
 
@@ -138,7 +97,7 @@ struct MatchWidgetEntryView: View {
 
                     Spacer()
 
-                    Text("in \(entry.timeUntil)")
+                    Text(entry.timeUntil)
                         .font(.caption)
                         .fontWeight(.medium)
                         .foregroundColor(mandatoryRed)

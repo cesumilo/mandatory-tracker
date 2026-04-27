@@ -5,7 +5,6 @@ import UserNotifications
 class NotificationScheduler {
     static let shared = NotificationScheduler()
     private let teamId = "7967"
-    private let apiURL = "https://vlr.orlandomm.net/api/v1/matches"
 
     private init() {}
 
@@ -17,63 +16,46 @@ class NotificationScheduler {
     }
 
     func scheduleNotificationsIfNeeded() {
-        fetchNextMatch { [weak self] match in
-            guard let self, let match else { return }
+        Task {
+            await fetchNextMatch { [weak self] match in
+                guard let self, let match else { return }
 
-            self.cancelExistingNotifications()
+                self.cancelExistingNotifications()
 
-            let matchTime = match.timestamp
-            let oneHourBefore = matchTime - 3600
-            let now = Date().timeIntervalSince1970
+                let matchTime = match.timestamp
+                let oneHourBefore = matchTime - 3600
+                let now = Date().timeIntervalSince1970
 
-            if oneHourBefore > now {
-                self.scheduleNotification(for: match, at: oneHourBefore)
-            } else if matchTime > now {
-                self.scheduleNotification(for: match, at: matchTime)
+                if oneHourBefore > now {
+                    self.scheduleNotification(for: match, at: oneHourBefore)
+                } else if matchTime > now {
+                    self.scheduleNotification(for: match, at: matchTime)
+                }
             }
         }
     }
 
-    private func fetchNextMatch(completion: @escaping (MatchData?) -> Void) {
-        guard let url = URL(string: apiURL) else {
+    private func fetchNextMatch(completion: @escaping (MatchData?) -> Void) async {
+        // Use VlrScraper to get upcoming matches
+        let upcomingMatches = await VlrScraper.shared.getUpcomingMatches()
+
+        guard let firstMatch = upcomingMatches.first else {
             completion(nil)
             return
         }
 
-        URLSession.shared.dataTask(with: url) { data, _, _ in
-            guard let data,
-                  let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any],
-                  let matches = json["data"] as? [[String: Any]]
-            else {
-                completion(nil)
-                return
-            }
+        // Find opponent name from the match
+        let opponent = firstMatch.teams.first { $0.id != teamId }
+        let opponentName = opponent?.name ?? "TBD"
 
-            let teamId = "7967"
-            for match in matches {
-                guard let status = match["status"] as? String,
-                      status == "Upcoming",
-                      let teams = match["teams"] as? [[String: Any]],
-                      teams.contains(where: { ($0["id"] as? String) == teamId }) else { continue }
+        let matchData = MatchData(
+            id: firstMatch.id,
+            event: firstMatch.event,
+            opponent: opponentName,
+            timestamp: TimeInterval(firstMatch.timestamp)
+        )
 
-                guard let matchId = match["id"] as? String,
-                      let event = match["event"] as? String,
-                      let teamsData = match["teams"] as? [[String: Any]] else { continue }
-
-                let opponent = teamsData.first { ($0["id"] as? String) != teamId }
-                let opponentName = opponent?["name"] as? String ?? "TBD"
-
-                let matchData = MatchData(
-                    id: matchId,
-                    event: event,
-                    opponent: opponentName,
-                    timestamp: match["timestamp"] as? TimeInterval ?? 0
-                )
-                completion(matchData)
-                return
-            }
-            completion(nil)
-        }.resume()
+        completion(matchData)
     }
 
     private func scheduleNotification(for match: MatchData, at timestamp: TimeInterval) {
@@ -129,11 +111,4 @@ class NotificationScheduler {
 
         center.add(request)
     }
-}
-
-struct MatchData {
-    let id: String
-    let event: String
-    let opponent: String
-    let timestamp: TimeInterval
 }

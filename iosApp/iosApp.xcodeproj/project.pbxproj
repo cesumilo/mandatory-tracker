@@ -12,6 +12,11 @@
 		59FA055464C4428B2CA89FC2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 46F5AA3F2C29D2A4EDBC7A82 /* Assets.xcassets */; };
 		772907E84AE8DF100DB8616D /* ValorantTrackerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8453CFB1E05B14D55D4A4D25 /* ValorantTrackerApp.swift */; };
 		8237B4887F860FB39297B036 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 12ED4E136CA9A524ED57E36B /* Assets.xcassets */; };
+		A27EC3532FA00C4C0011E87B /* VlrScraper.swift in Sources */ = {isa = PBXBuildFile; fileRef = A27EC3522FA00C4C0011E87B /* VlrScraper.swift */; };
+		A27EC3582FA00C710011E87B /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A27EC3552FA00C710011E87B /* ContentView.swift */; };
+		A27EC3592FA00C710011E87B /* BackgroundTaskManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A27EC3542FA00C710011E87B /* BackgroundTaskManager.swift */; };
+		A27EC35A2FA00C710011E87B /* NotificationScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = A27EC3562FA00C710011E87B /* NotificationScheduler.swift */; };
+		A27EC35B2FA00C710011E87B /* VlrScraper.swift in Sources */ = {isa = PBXBuildFile; fileRef = A27EC3572FA00C710011E87B /* VlrScraper.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -45,6 +50,11 @@
 		8453CFB1E05B14D55D4A4D25 /* ValorantTrackerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValorantTrackerApp.swift; sourceTree = "<group>"; };
 		9D3AD07D0B33B21B16A53DA3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		9F34FD4327CCFF0FA43B14A3 /* ValorantWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ValorantWidgetExtension.entitlements; sourceTree = "<group>"; };
+		A27EC3522FA00C4C0011E87B /* VlrScraper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VlrScraper.swift; sourceTree = "<group>"; };
+		A27EC3542FA00C710011E87B /* BackgroundTaskManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundTaskManager.swift; sourceTree = "<group>"; };
+		A27EC3552FA00C710011E87B /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		A27EC3562FA00C710011E87B /* NotificationScheduler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationScheduler.swift; sourceTree = "<group>"; };
+		A27EC3572FA00C710011E87B /* VlrScraper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VlrScraper.swift; sourceTree = "<group>"; };
 		AA8A03739518FA7D99C77DFB /* ValorantTracker.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = ValorantTracker.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		AC046B75E3019A82C0A40D63 /* ValorantTracker.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ValorantTracker.entitlements; sourceTree = "<group>"; };
 		C59114F647E69202552CE362 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
@@ -66,6 +76,7 @@
 			children = (
 				12ED4E136CA9A524ED57E36B /* Assets.xcassets */,
 				9D3AD07D0B33B21B16A53DA3 /* Info.plist */,
+				A27EC3522FA00C4C0011E87B /* VlrScraper.swift */,
 				D12F0D8FB88461BD668BE947 /* MatchWidget.swift */,
 				9F34FD4327CCFF0FA43B14A3 /* ValorantWidgetExtension.entitlements */,
 			);
@@ -88,6 +99,10 @@
 				46F5AA3F2C29D2A4EDBC7A82 /* Assets.xcassets */,
 				C59114F647E69202552CE362 /* Info.plist */,
 				AC046B75E3019A82C0A40D63 /* ValorantTracker.entitlements */,
+				A27EC3542FA00C710011E87B /* BackgroundTaskManager.swift */,
+				A27EC3552FA00C710011E87B /* ContentView.swift */,
+				A27EC3562FA00C710011E87B /* NotificationScheduler.swift */,
+				A27EC3572FA00C710011E87B /* VlrScraper.swift */,
 				8453CFB1E05B14D55D4A4D25 /* ValorantTrackerApp.swift */,
 			);
 			name = Sources;
@@ -108,10 +123,13 @@
 			buildRules = (
 			);
 			dependencies = (
+				A2AA9E212FA0198D006FBBCD /* PBXTargetDependency */,
 				FFB3EA83FAD9FC127DA641FE /* PBXTargetDependency */,
 			);
 			name = ValorantTracker;
 			packageProductDependencies = (
+				A27EC36A2FA018300011E87B /* SwiftSoup */,
+				A27EC36B2FA018300011E87B /* SwiftSoupProfile */,
 			);
 			productName = ValorantTracker;
 			productReference = AA8A03739518FA7D99C77DFB /* ValorantTracker.app */;
@@ -127,9 +145,11 @@
 			buildRules = (
 			);
 			dependencies = (
+				A2AA9E1F2FA01989006FBBCD /* PBXTargetDependency */,
 			);
 			name = ValorantWidgetExtension;
 			packageProductDependencies = (
+				B27EC36A2FA018300011E88C /* SwiftSoup */,
 			);
 			productName = ValorantWidgetExtension;
 			productReference = 1AF6501957A8A1ED7CECC17F /* ValorantWidgetExtension.appex */;
@@ -143,8 +163,6 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1500;
-				TargetAttributes = {
-				};
 			};
 			buildConfigurationList = FF7CA1CA754D017066F1822F /* Build configuration list for PBXProject "iosApp" */;
 			developmentRegion = en;
@@ -155,6 +173,9 @@
 			);
 			mainGroup = 38B69C3F79CD97858CF7B609;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				A27EC3692FA018300011E87B /* XCRemoteSwiftPackageReference "SwiftSoup" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 94C98B8B3A2BFC1966447269 /* Products */;
 			projectDirPath = "";
@@ -191,6 +212,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				2C7FC91DDB0A56E89962C373 /* MatchWidget.swift in Sources */,
+				A27EC3532FA00C4C0011E87B /* VlrScraper.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -199,12 +221,24 @@
 			buildActionMask = 2147483647;
 			files = (
 				772907E84AE8DF100DB8616D /* ValorantTrackerApp.swift in Sources */,
+				A27EC3582FA00C710011E87B /* ContentView.swift in Sources */,
+				A27EC3592FA00C710011E87B /* BackgroundTaskManager.swift in Sources */,
+				A27EC35A2FA00C710011E87B /* NotificationScheduler.swift in Sources */,
+				A27EC35B2FA00C710011E87B /* VlrScraper.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		A2AA9E1F2FA01989006FBBCD /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = A2AA9E1E2FA01989006FBBCD /* SwiftSoup */;
+		};
+		A2AA9E212FA0198D006FBBCD /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			productRef = A2AA9E202FA0198D006FBBCD /* SwiftSoup */;
+		};
 		FFB3EA83FAD9FC127DA641FE /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = AC245C91F792C4B9C1ECD330 /* ValorantWidgetExtension */;
@@ -443,6 +477,45 @@
 			defaultConfigurationName = Debug;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		A27EC3692FA018300011E87B /* XCRemoteSwiftPackageReference "SwiftSoup" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/scinfu/SwiftSoup.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.13.4;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		A27EC36A2FA018300011E87B /* SwiftSoup */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A27EC3692FA018300011E87B /* XCRemoteSwiftPackageReference "SwiftSoup" */;
+			productName = SwiftSoup;
+		};
+		B27EC36A2FA018300011E88C /* SwiftSoup */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A27EC3692FA018300011E87B /* XCRemoteSwiftPackageReference "SwiftSoup" */;
+			productName = SwiftSoup;
+		};
+		A27EC36B2FA018300011E87B /* SwiftSoupProfile */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A27EC3692FA018300011E87B /* XCRemoteSwiftPackageReference "SwiftSoup" */;
+			productName = SwiftSoupProfile;
+		};
+		A2AA9E1E2FA01989006FBBCD /* SwiftSoup */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A27EC3692FA018300011E87B /* XCRemoteSwiftPackageReference "SwiftSoup" */;
+			productName = SwiftSoup;
+		};
+		A2AA9E202FA0198D006FBBCD /* SwiftSoup */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A27EC3692FA018300011E87B /* XCRemoteSwiftPackageReference "SwiftSoup" */;
+			productName = SwiftSoup;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 242FB5348943441C388468CE /* Project object */;
 }
