@@ -464,8 +464,10 @@ class MainActivity : ComponentActivity() {
                     }
                 }
                 Column(horizontalAlignment = Alignment.End) {
-                    Text(match.ago ?: "", fontSize = 10.sp, color = Color.White.copy(alpha = 0.6f))
-                    Text("ago", fontSize = 9.sp, color = Color.White.copy(alpha = 0.5f))
+                    val agoText = match.ago
+                    if (!agoText.isNullOrEmpty()) {
+                        Text(agoText, fontSize = 10.sp, color = Color.White.copy(alpha = 0.6f))
+                    }
                 }
             }
         }

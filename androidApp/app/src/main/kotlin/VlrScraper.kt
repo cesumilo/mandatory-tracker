@@ -35,6 +35,8 @@ object VlrScraper {
         val score1: String?,
         val score2: String?,
         val matchDate: String?, // Format: "2026/04/26"
+        val matchTime: String?, // Format: "9:00 pm"
+        val isUpcoming: Boolean,
         val isCompleted: Boolean,
         val isWin: Boolean?
     )
@@ -153,19 +155,35 @@ object VlrScraper {
         val team1IsMandatory = team1Name.contains("Mandatory", ignoreCase = true)
         val mandatoryIsFirst = team1IsMandatory
 
-        // Parse scores, time, and date
+// Parse scores, time, and date
         var timeUntil: String? = null
         var score1: String? = null
         var score2: String? = null
         var isWin: Boolean? = null
         var matchDate: String? = null
+        var matchTime: String? = null
 
-        if (isUpcoming) {
+if (isUpcoming) {
             timeUntil = item.select("span.rm-item-score-eta").text().trim()
             if (timeUntil.isEmpty()) timeUntil = "TBD"
 
-            // Parse date from parent
-            matchDate = item.select("div.m-item-date").text().trim()
+            // Parse date and time from m-item-date
+            val dateContainer = item.select("div.m-item-date").first()
+            if (dateContainer != null) {
+                // Get the HTML content to parse date and time separately
+                val html = dateContainer.html()
+
+                // Extract date from between <div> and </div>
+                val dateMatch = Regex("<div>\\s*(\\d{4}/\\d{2}/\\d{2})\\s*</div>").find(html)
+                matchDate = dateMatch?.groupValues?.get(1)
+
+                // Extract time from after </div> to end
+                val timeMatch = Regex("</div>\\s*([\\d:]+\\s*(?:am|pm|AM|PM)?)").find(html)
+                matchTime = timeMatch?.groupValues?.get(1)?.trim()
+
+                Log.d("VlrScraper", "Parsed upcoming - raw html: ${html.replace("\n", "")}")
+                Log.d("VlrScraper", "Parsed upcoming - date: '$matchDate', time: '$matchTime'")
+            }
         } else if (isCompleted) {
             val scoreSpans = resultDiv?.select("span")
             score1 = scoreSpans?.getOrNull(0)?.text()
@@ -173,8 +191,9 @@ object VlrScraper {
 
             isWin = resultDiv?.hasClass("mod-win") == true
 
-            // Parse date for completed matches
-            matchDate = item.select("div.m-item-date").text().trim()
+            // Parse date for completed matches from inner div and clean it
+            val dateDiv = item.select("div.m-item-date > div").first()
+            matchDate = dateDiv?.text()?.trim()?.replace(Regex("\\s+"), "")
         }
 
         // Reorder teams so Mandatory is always first
@@ -198,6 +217,8 @@ object VlrScraper {
             score1 = score1,
             score2 = score2,
             matchDate = matchDate,
+            matchTime = matchTime,
+            isUpcoming = isUpcoming,
             isCompleted = isCompleted,
             isWin = isWin
         )
@@ -211,13 +232,24 @@ object VlrScraper {
         }
     }
 
-    private fun ScrapedMatch.toMatchData(): MatchData {
+private fun ScrapedMatch.toMatchData(): MatchData {
         val isMandatoryWin = isWin == true
 
-        // Calculate "ago" text from match date
+        // Calculate "ago" text from match date for completed matches
         val agoText = if (isCompleted && matchDate != null) {
             calculateAgoFromDate(matchDate)
         } else null
+
+        // For upcoming matches, format the time display
+        val timeDisplay = if (isUpcoming) {
+            if (!matchTime.isNullOrEmpty()) {
+                "in $timeUntil at $matchTime"
+            } else {
+                "in $timeUntil"
+            }
+        } else {
+            timeUntil ?: ""
+        }
 
         return MatchData(
             id = matchId,
@@ -243,66 +275,98 @@ object VlrScraper {
             event = eventName,
             tournament = tournamentName,
             img = null,
-            timeUntil = timeUntil ?: "",
-            timestamp = parseDateToTimestamp(matchDate), // Parse actual date
+            timeUntil = timeDisplay,
+            timestamp = parseDateToTimestamp(matchDate, matchTime), // Parse actual date with time
             ago = agoText
         )
     }
 
     private fun calculateAgoFromDate(dateStr: String): String {
         try {
+            // Clean up the date string - extract just YYYY/MM/DD
+            val cleanDateStr = dateStr.trim().substringBefore(" ").replace(Regex("\\s+"), "")
+
             // Parse date format: "2026/04/26"
-            val parts = dateStr.split("/")
+            val parts = cleanDateStr.split("/")
             if (parts.size == 3) {
                 val year = parts[0].toInt()
                 val month = parts[1].toInt()
-                val day = parts[2].toInt()
+                val day = parts[2].toInt().coerceIn(1, 31) // Ensure valid day
 
-                // Create calendar for match date
+                // Create calendar for match date at midnight
                 val matchCal = java.util.Calendar.getInstance()
                 matchCal.set(year, month - 1, day, 0, 0, 0)
+                matchCal.set(java.util.Calendar.MILLISECOND, 0)
 
-                // Get today's date
+                // Get today's date at midnight
                 val todayCal = java.util.Calendar.getInstance()
-                todayCal.set(java.util.Calendar.HOUR_OF_DAY, 0)
-                todayCal.set(java.util.Calendar.MINUTE, 0)
-                todayCal.set(java.util.Calendar.SECOND, 0)
+                val currentYear = todayCal.get(java.util.Calendar.YEAR)
+                val currentMonth = todayCal.get(java.util.Calendar.MONTH)
+                val currentDay = todayCal.get(java.util.Calendar.DAY_OF_MONTH)
+                todayCal.set(currentYear, currentMonth, currentDay, 0, 0, 0)
                 todayCal.set(java.util.Calendar.MILLISECOND, 0)
 
-                // Calculate days difference
+                // Calculate days difference (today - match = days ago)
                 val diffMillis = todayCal.timeInMillis - matchCal.timeInMillis
                 val daysAgo = (diffMillis / (1000 * 60 * 60 * 24)).toInt()
 
+                Log.d("VlrScraper", "Date: $cleanDateStr (y=$year, m=$month, d=$day), today: $currentYear/$currentMonth/$currentDay, days ago: $daysAgo")
+
                 return when {
+                    daysAgo < 0 -> "in ${-daysAgo}d" // Future date
                     daysAgo == 0 -> "Today"
-                    daysAgo == 1 -> "1d"
-                    daysAgo < 7 -> "${daysAgo}d"
-                    daysAgo < 30 -> "${daysAgo / 7}w"
-                    else -> "${daysAgo / 30}mo"
+                    daysAgo == 1 -> "1d ago"
+                    daysAgo < 7 -> "${daysAgo}d ago"
+                    daysAgo < 30 -> "${daysAgo / 7}w ago"
+                    else -> "${daysAgo / 30}mo ago"
                 }
             }
         } catch (e: Exception) {
-            Log.w("VlrScraper", "Failed to calculate ago from date: $dateStr")
+            Log.w("VlrScraper", "Failed to calculate ago from date: '$dateStr' - ${e.message}")
         }
         return "Recent"
     }
 
-    private fun parseDateToTimestamp(dateStr: String?): Long {
+    private fun parseDateToTimestamp(dateStr: String?, timeStr: String? = null): Long {
         if (dateStr == null) return System.currentTimeMillis() / 1000
 
         try {
-            val parts = dateStr.split("/")
+            // Extract just the date part (YYYY/MM/DD) before any time
+            val dateOnly = dateStr.trim().substringBefore(" ").replace(Regex("\\s+"), "")
+            val parts = dateOnly.split("/")
+
             if (parts.size == 3) {
                 val year = parts[0].toInt()
                 val month = parts[1].toInt()
                 val day = parts[2].toInt()
 
                 val cal = java.util.Calendar.getInstance()
-                cal.set(year, month - 1, day, 0, 0, 0)
+
+                // Parse time if available (format: "9:00 pm")
+                var hour = 0
+                var minute = 0
+                if (!timeStr.isNullOrEmpty()) {
+                    val timeClean = timeStr.trim().lowercase()
+                    val timeParts = timeClean.split(":", " ")
+                    if (timeParts.size >= 2) {
+                        hour = timeParts[0].toInt()
+                        minute = timeParts[1].toInt()
+                        // Handle pm
+                        if (timeClean.contains("pm") && hour < 12) {
+                            hour += 12
+                        }
+                        // Handle am
+                        if (timeClean.contains("am") && hour == 12) {
+                            hour = 0
+                        }
+                    }
+                }
+
+                cal.set(year, month - 1, day, hour, minute, 0)
                 return cal.timeInMillis / 1000
             }
         } catch (e: Exception) {
-            Log.w("VlrScraper", "Failed to parse date: $dateStr")
+            Log.w("VlrScraper", "Failed to parse date/time: '$dateStr' / '$timeStr'")
         }
         return System.currentTimeMillis() / 1000
     }

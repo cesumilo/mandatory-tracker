@@ -156,7 +156,7 @@ private fun WidgetContent(
 
             if (timeUntil != null) {
                 Text(
-                    text = "in $timeUntil",
+                    text = timeUntil,
                     style =
                         TextStyle(
                             fontSize = 14.sp,
