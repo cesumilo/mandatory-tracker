@@ -14,6 +14,7 @@
 - iOS: NotificationScheduler with BGTaskScheduler for background refresh
 - Background color: Dark (`#0D0D0D`) consistent across safe/unsafe areas
 - Widget: Time-until now correctly computed from `timestamp` (not stale API string)
+- Android widget: Now properly displays actual match data instead of hardcoded values
 
 ## 🏛️ Architectural Decisions
 
@@ -35,6 +36,11 @@
   - Widget was showing stale `timeUntil` from API string (static at scrape time)
   - Both Android (MatchSyncWorker) and iOS (MatchWidget) now compute time remaining from `timestamp` using current time
   - Matches behavior of `getNextMatchInfo()` in MainActivity
+
+- **2026-04-27** — Android widget display fix — ✅ Done
+  - Fixed Android Glance widget to read actual match data from SharedPreferences instead of hardcoded values
+  - Updated widget implementation in androidApp/widget module to match working app widget
+  - Widget now properly displays upcoming match information, event details, and time-until
 
 - **2026-04-23** — Phase 0: Scaffolding — ✅ Done
 - **2026-04-23** — Phase 1: Shared Domain & Networking — ✅ Done
@@ -106,6 +112,10 @@
 
 - Widget `timeUntil` uses API's `in` field directly — this is a static string set at scrape time, not time-remaining
   - Must compute from `timestamp` using current time for accurate countdown
+
+- Android widget has two implementations: app widget (working) and Glance widget (broken with hardcoded data)
+  - Fixed by updating Glance widget to read from SharedPreferences like the app widget
+  - Widget module must not reference app-specific components like MainActivity
 
 ## ❓ Open Questions & Follow-ups
 
