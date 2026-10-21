@@ -34,8 +34,8 @@ A cross-platform home screen widget application for Android and iOS that display
 | Home Screen UI | Jetpack Compose | SwiftUI |
 | Background Sync | WorkManager | BGTaskScheduler |
 | Notifications | AlarmManager + BroadcastReceiver | UNUserNotificationCenter |
-| Networking | HttpURLConnection | URLSession |
-| Data Layer | Kotlin Multiplatform (KMP) shared module | |
+| Networking | HttpURLConnection + Jsoup | URLSession + SwiftSoup |
+| Data Layer | Kotlin Multiplatform (KMP) shared module (Ktor) | |
 
 ## Project Structure
 
@@ -43,30 +43,37 @@ A cross-platform home screen widget application for Android and iOS that display
 .
 ├── androidApp/                    # Android app + widget
 │   ├── app/src/main/kotlin/
-│   │   ├── MainActivity.kt       # Home screen UI (Compose)
-│   │   ├── ValorantTrackerApp.kt # Application class
-│   │   └── widget/
-│   │       ├── MatchWidget.kt    # Glance widget
-│   │       ├── MatchSyncWorker.kt    # WorkManager sync
+│   │   ├── MainActivity.kt        # Home screen UI (Compose)
+│   │   ├── DebugActivity.kt       # Debug / observability screen
+│   │   ├── ValorantTrackerApp.kt  # Application class
+│   │   ├── VlrScraper.kt          # vlr.gg scraper (Jsoup)
+│   │   └── com/valoranttracker/widget/
+│   │       ├── MatchWidget.kt              # Glance widget
+│   │       ├── MatchWidgetReceiver.kt      # AppWidgetProvider
+│   │       ├── MatchSyncWorker.kt          # WorkManager sync
 │   │       ├── MatchNotificationWorker.kt  # 1h notification
-│   │       └── MatchInfo.kt      # Widget data provider
-│   └── widget/                   # Widget module
+│   │       └── MatchInfo.kt                # Widget data provider
+│   └── widget/                    # Widget module
 │
 ├── iosApp/                       # iOS app + widget
 │   ├── App/Sources/
-│   │   ├── ValorantTrackerApp.swift  # App entry point
-│   │   ├── ContentView.swift     # Home screen UI
-│   │   ├── NotificationScheduler.swift  # iOS notifications
-│   │   └── BackgroundTaskManager.swift  # Background refresh
+│   │   ├── ValorantTrackerApp.swift      # App entry point
+│   │   ├── ContentView.swift             # Home screen UI
+│   │   ├── VlrScraper.swift              # vlr.gg scraper (SwiftSoup)
+│   │   ├── NotificationScheduler.swift   # iOS notifications
+│   │   └── BackgroundTaskManager.swift   # Background refresh
 │   └── WidgetExtension/Sources/
-│       └── MatchWidget.swift     # WidgetKit widget
+│       ├── MatchWidget.swift             # WidgetKit widget
+│       └── VlrScraper.swift              # Widget scraper (15-min cache)
 │
 ├── shared/                       # KMP shared module
 │   └── commonMain/kotlin/
 │       └── com/valoranttracker/shared/
 │           ├── domain/model/     # Domain models
-│           ├── data/api/         # API client
-│           └── data/cache/        # Caching
+│           ├── data/scraping/    # vlr.gg scraper (Ktor)
+│           ├── data/api/         # Legacy vlresports client (unused)
+│           ├── data/dto/         # Wire DTOs
+│           └── data/cache/       # Caching
 │
 ├── .github/workflows/
 │   ├── build.yml       # CI: build on push/PR
@@ -126,16 +133,16 @@ pre-commit run --all-files
 | Loss Red | `#E53935` |
 | Card Background | `#1A1A1A` |
 
-## API
+## Data Source
 
-Uses **[vlr.orlandomm.net](https://vlr.orlandomm.net)** — an unofficial vlr.gg scraper API.
+Match data is **scraped directly from [vlr.gg](https://www.vlr.gg/team/7967/mandatory)** — the team page for Mandatory (team ID `7967`).
 
-- Base URL: `https://vlr.orlandomm.net`
-- Endpoints:
-  - `/api/v1/matches` — upcoming matches
-  - `/api/v1/results?page=N` — past results (paginated)
+- URL: `https://www.vlr.gg/team/7967/mandatory`
+- Parsing: [Jsoup](https://jsoup.org) on Android, [SwiftSoup](https://github.com/scinfu/SwiftSoup) on iOS
 - No authentication required
-- Respectful rate limiting via cache-first design
+- **Cache-first**: results are cached for 1 hour (15 minutes in the iOS widget extension); the cache is the only thing widgets read
+- Resilient: falls back to the last successful scrape when offline or when the page structure drifts
+- Respectful: one request per cache window, with a browser-like User-Agent
 
 ## Contributing
 
@@ -146,6 +153,6 @@ Uses **[vlr.orlandomm.net](https://vlr.orlandomm.net)** — an unofficial vlr.gg
 
 ## License
 
-This is an unofficial third-party app. Not affiliated with Mandatory or Riot Games.
+This is an unofficial third-party app. Not affiliated with Mandatory, vlr.gg, or Riot Games.
 
-Match data powered by **[vlresports](https://github.com/Orloxx23/vlresports)** (Apache 2.0).
+Match data scraped from **[vlr.gg](https://vlr.gg)**.

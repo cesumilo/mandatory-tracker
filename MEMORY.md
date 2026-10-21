@@ -35,6 +35,12 @@
 
 ## 📜 Task Log
 
+- **2026-10-21** — Docs sync (README + PRODUCT) — ✅ Done
+  - README still described the legacy vlresports API (`vlr.orlandomm.net`, `/api/v1/matches`, `/api/v1/results`) — updated to reflect direct vlr.gg scraping (`https://www.vlr.gg/team/7967/mandatory`) with Jsoup/SwiftSoup
+  - Fixed Tech Stack networking row, Project Structure tree, and attribution
+  - Fixed PRODUCT.md: team 7967 was mislabeled "Sentinels" (should be Mandatory); refreshed its Data Source section
+  - Files: `README.md`, `PRODUCT.md`
+
 - **2026-04-26** — Widget time-off bug fix — ✅ Done
   - Widget was showing stale `timeUntil` from API string (static at scrape time)
   - Both Android (MatchSyncWorker) and iOS (MatchWidget) now compute time remaining from `timestamp` using current time
@@ -172,3 +178,4 @@
 
 - Future: Multi-team support (team following configurable)
 - Widget tap opens companion app (resolved)
+- `shared/` KMP module (`VlrApi`, `UpcomingMatchesRepository`, `data/scraping/VlrScraper`) is **not consumed by either app** — Android and iOS each use their own platform-native scraper. Decide whether to wire the shared layer in or drop the dead code.

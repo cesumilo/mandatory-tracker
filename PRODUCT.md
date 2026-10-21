@@ -2,9 +2,9 @@
 
 A home screen widget for Android and iOS that displays upcoming Valorant esports matches for your favorite team.
 
-## Team ID: 7967 (Sentinels)
+## Team ID: 7967 (Mandatory)
 
-Displays upcoming matches for Sentinels - when they play next, who against, and in which tournament.
+Displays upcoming matches for Mandatory - when they play next, who against, and in which tournament.
 
 ## Platform Support
 
@@ -22,9 +22,10 @@ Displays upcoming matches for Sentinels - when they play next, who against, and 
 
 ## Data Source
 
-API: [vlresports](https://github.com/Orloxx23/vlresports) (Apache 2.0)
-- Base URL: https://vlr.orlandomm.net
-- Scrapes vlr.gg for match data
+Direct HTML scraping of [vlr.gg](https://www.vlr.gg/team/7967/mandatory)
+- URL: https://www.vlr.gg/team/7967/mandatory
+- Parsing: Jsoup (Android), SwiftSoup (iOS)
+- 1-hour cache (15 minutes in the iOS widget extension)
 - No authentication required
 
 ## Architecture
