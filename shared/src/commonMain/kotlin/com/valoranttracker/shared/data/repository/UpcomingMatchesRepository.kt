@@ -8,8 +8,8 @@ import com.valoranttracker.shared.domain.model.UpcomingMatch
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
+import kotlin.time.Clock
+import kotlin.time.Instant
 
 class UpcomingMatchesRepository(
     private val api: VlrApi,
